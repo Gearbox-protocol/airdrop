@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.10;
 
-import "@openzeppelin/contracts/access/Ownable.sol"
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import { IAirdropDistributor, DistributionData } from "./IAirdropDistributor.sol";
@@ -15,7 +15,7 @@ contract AirdropDistributor is Ownable, IAirdropDistributor {
     bytes32 public override merkleRoot;
 
     /// @dev The mapping that stores amounts already claimed by users
-    mapping(address => uint256) claimed;
+    mapping(address => uint256) public claimed;
 
     constructor(address token_, bytes32 merkleRoot_) {
         token = IERC20(token_);
@@ -31,7 +31,7 @@ contract AirdropDistributor is Ownable, IAirdropDistributor {
     function emitDistributionEvents(DistributionData[] calldata data) external onlyOwner {
         uint256 len = data.length;
         for (uint256 i = 0; i < len; ) {
-            emit TokenAllocated(data.account, data.campaignId, data.amount);
+            emit TokenAllocated(data[i].account, data[i].campaignId, data[i].amount);
             unchecked {
                 ++i;
             }

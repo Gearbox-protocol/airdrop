@@ -1,23 +1,23 @@
 import * as dotenv from "dotenv";
 import * as fs from "fs";
 import {
-  MerkleDistributorInfo,
-  NewFormat,
+  AirdropDistributorInfo,
+  ClaimableBalance,
   parseBalanceMap,
 } from "../merkle/parse-accounts";
-import { degens } from "../degens";
+import { recipients } from "../recipients";
 import { Logger } from "tslog";
-import { DegenDistributor } from "../types";
+import { AirdropDistributor } from "../types";
 import { Verifier, deploy, waitForTransaction } from "@gearbox-protocol/devops";
 import { ethers } from "hardhat";
 import { JsonRpcProvider } from "@ethersproject/providers";
 
-async function deployMerkle() {
+async function deployDistributor() {
   dotenv.config({ path: ".env.goerli" });
 
-  const DEGEN_NFT = process.env.REACT_APP_DEGEN_NFT || "";
+  const GEAR_TOKEN = process.env.REACT_APP_GEAR_TOKEN || "";
 
-  if (DEGEN_NFT === "") {
+  if (GEAR_TOKEN === "") {
     throw new Error("Address provider is not set");
   }
 
@@ -31,34 +31,34 @@ async function deployMerkle() {
   const provider = new JsonRpcProvider(process.env.ETH_MAINNET_PROVIDER);
   dotenv.config();
 
-  const degensAddr: Array<NewFormat> = [];
-  for (const d of degens) {
-    const address = await provider.resolveName(d.address);
+  const recipientsAddr: Array<ClaimableBalance> = [];
+  for (const r of recipients) {
+    const address = await provider.resolveName(r.address);
     if (address) {
-      degensAddr.push({
+      recipientsAddr.push({
         address,
-        amount: d.amount,
+        amount: r.amount,
       });
     }
   }
 
-  const merkle = parseBalanceMap(degensAddr);
+  const merkle = parseBalanceMap(recipientsAddr);
 
-  const degenDistributor = await deploy<DegenDistributor>(
-    "DegenDistributor",
+  const airdropDistributor = await deploy<AirdropDistributor>(
+    "AirdropDistributor",
     log,
-    DEGEN_NFT,
+    GEAR_TOKEN,
     merkle.merkleRoot
   );
 
   verifier.addContract({
-    address: degenDistributor.address,
-    constructorArguments: [DEGEN_NFT, merkle.merkleRoot],
+    address: airdropDistributor.address,
+    constructorArguments: [GEAR_TOKEN, merkle.merkleRoot],
   });
 
   fs.writeFileSync("./merkle.json", JSON.stringify(merkle));
 }
 
-deployMerkle()
+deployDistributor()
   .then(() => console.log("Ok"))
   .catch((e) => console.log(e));
