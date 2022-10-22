@@ -4,12 +4,18 @@ pragma solidity ^0.8.10;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
-import { IAirdropDistributor, DistributionData } from "./IAirdropDistributor.sol";
+import {IAddressProvider} from "@gearbox-protocol/core-v2/contracts/interfaces/IAddressProvider.sol";
+import {IAirdropDistributor, DistributionData, ClaimedData} from "./IAirdropDistributor.sol";
 
 contract AirdropDistributor is Ownable, IAirdropDistributor {
+    /// @dev Emits each time when call not by treasury
+    error TreasuryOnlyException();
 
     /// @dev Returns the token distributed by the contract
     IERC20 public immutable override token;
+
+    /// @dev DAO Treasury address
+    address public immutable treasury;
 
     /// @dev The current merkle root of total claimable balances
     bytes32 public override merkleRoot;
@@ -17,23 +23,50 @@ contract AirdropDistributor is Ownable, IAirdropDistributor {
     /// @dev The mapping that stores amounts already claimed by users
     mapping(address => uint256) public claimed;
 
-    constructor(address token_, bytes32 merkleRoot_) {
-        token = IERC20(token_);
-        merkleRoot = merkleRoot_;
+    modifier treasuryOnly() {
+        if (msg.sender != treasury) revert TreasuryOnlyException();
+        _;
     }
 
-    function updateMerkleRoot(bytes32 newRoot) external onlyOwner {
+    constructor(
+        address addressProvider,
+        bytes32 merkleRoot_,
+        ClaimedData[] memory alreadyClaimed
+    ) {
+        token = IERC20(IAddressProvider(addressProvider).getGearToken());
+        treasury = IAddressProvider(addressProvider).getTreasuryContract();
+        merkleRoot = merkleRoot_;
+
+        uint256 len = alreadyClaimed.length;
+        unchecked {
+            for (uint256 i = 0; i < len; ++i) {
+                claimed[alreadyClaimed[i].account] = alreadyClaimed[i].amount;
+                emit Claimed(
+                    alreadyClaimed[i].account,
+                    alreadyClaimed[i].amount
+                );
+            }
+        }
+    }
+
+    function updateMerkleRoot(bytes32 newRoot) external treasuryOnly {
         bytes32 oldRoot = merkleRoot;
         merkleRoot = newRoot;
         emit RootUpdated(oldRoot, newRoot);
     }
 
-    function emitDistributionEvents(DistributionData[] calldata data) external onlyOwner {
+    function emitDistributionEvents(DistributionData[] calldata data)
+        external
+        onlyOwner
+    {
         uint256 len = data.length;
-        for (uint256 i = 0; i < len; ) {
-            emit TokenAllocated(data[i].account, data[i].campaignId, data[i].amount);
-            unchecked {
-                ++i;
+        unchecked {
+            for (uint256 i = 0; i < len; ++i) {
+                emit TokenAllocated(
+                    data[i].account,
+                    data[i].campaignId,
+                    data[i].amount
+                );
             }
         }
     }
@@ -45,7 +78,6 @@ contract AirdropDistributor is Ownable, IAirdropDistributor {
         uint256 claimedAmount,
         bytes32[] calldata merkleProof
     ) external override {
-
         require(
             claimed[account] + claimedAmount <= totalAmount,
             "MerkleDistributor: Total claimed amount is more than total rewards"
@@ -56,10 +88,10 @@ contract AirdropDistributor is Ownable, IAirdropDistributor {
             MerkleProof.verify(merkleProof, merkleRoot, node),
             "MerkleDistributor: Invalid proof."
         );
-        
+
         claimed[account] += claimedAmount;
         token.transfer(account, claimedAmount);
 
-        emit Claimed(index, account, claimedAmount);
+        emit Claimed(account, claimedAmount);
     }
 }

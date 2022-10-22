@@ -1,36 +1,67 @@
-import * as dotenv from "dotenv";
-import * as fs from "fs";
 import {
-  AirdropDistributorInfo,
-  ClaimableBalance,
-  parseBalanceMap,
-} from "../merkle/parse-accounts";
-import { recipients } from "../recipients";
-import { Logger } from "tslog";
-import { AirdropDistributor } from "../types";
-import { Verifier, deploy, waitForTransaction, detectNetwork } from "@gearbox-protocol/devops";
-import { ethers } from "hardhat";
-import { JsonRpcProvider } from "@ethersproject/providers";
+  detectNetwork,
+  Verifier,
+  waitForTransaction,
+} from "@gearbox-protocol/devops";
 import { getNetworkType } from "@gearbox-protocol/sdk";
+import * as dotenv from "dotenv";
+import { BigNumber } from "ethers";
+import * as fs from "fs";
+import { ethers } from "hardhat";
+import { Logger } from "tslog";
+import { campaigns } from "../airdrops/0_types";
+import { ClaimableBalance } from "../merkle/parse-accounts";
+import { DistributionDataStruct } from "../types/contracts/AirdropDistributor";
+import { deployDistributor } from "./deployer";
 
-export async function deployDistributor(tokenAddress: string, initialBalances: ClaimableBalance[], log: Logger): Promise<[AirdropDistributor, AirdropDistributorInfo]> {
-  log.info("Generating tree");
-  const distributorInfo = parseBalanceMap(initialBalances);
+interface InitialClaim {
+  distributed: Array<ClaimableBalance>;
+  claimed: Array<ClaimableBalance>;
+  events: Array<DistributionDataStruct>;
+}
 
-  log.info("Deploying distributor");
+export const mapToClaimed = (map: Record<string, BigNumber>) =>
+  Object.entries(map).map(([address, amount]) => ({
+    address,
+    amount,
+  }));
 
-  const airdropDistributor = await deploy<AirdropDistributor>(
-    "AirdropDistributor",
-    log,
-    tokenAddress,
-    distributorInfo.merkleRoot
-  );
+export function getInitialSetup(): InitialClaim {
+  const distributed: Record<string, BigNumber> = {};
+  const claimed: Record<string, BigNumber> = {};
+  const events: Array<DistributionDataStruct> = [];
 
-  return [airdropDistributor, distributorInfo]
+  for (const c of campaigns) {
+    c.distributed.forEach((data) => {
+      const amount = BigNumber.from(1e18).mul(data.amount);
+      const account = data.address.toLowerCase();
+
+      distributed[account] = distributed[account].add(amount);
+      events.push({
+        account,
+        campaignId: c.campaign,
+        amount,
+      });
+    });
+
+    c.claimed.forEach((data) => {
+      const amount = BigNumber.from(1e18).mul(data.amount);
+      const account = data.address.toLowerCase();
+
+      claimed[account] = claimed[account].add(amount);
+    });
+  }
+
+  const result: InitialClaim = {
+    distributed: mapToClaimed(distributed),
+    claimed: mapToClaimed(claimed),
+    events,
+  };
+
+  return result;
 }
 
 async function deployDistributorLive() {
-
   const accounts = await ethers.getSigners();
   const deployer = accounts[0];
 
@@ -44,7 +75,7 @@ async function deployDistributorLive() {
   } else if (networkType == "Mainnet") {
     dotenv.config({ path: ".env.mainnet" });
   }
-  
+
   const GEAR_TOKEN = process.env.REACT_APP_GEAR_TOKEN || "";
 
   if (GEAR_TOKEN === "") {
@@ -54,15 +85,23 @@ async function deployDistributorLive() {
   const log = new Logger();
   const verifier = new Verifier();
 
-  const provider = new JsonRpcProvider(process.env.ETH_MAINNET_PROVIDER);
   dotenv.config();
 
-  const [airdropDistributor, merkle] = await deployDistributor(GEAR_TOKEN, recipients, log)
+  const { distributed, claimed, events } = getInitialSetup();
+
+  const [airdropDistributor, merkle] = await deployDistributor(
+    GEAR_TOKEN,
+    distributed,
+    claimed,
+    log
+  );
 
   verifier.addContract({
     address: airdropDistributor.address,
     constructorArguments: [GEAR_TOKEN, merkle.merkleRoot],
   });
+
+  await waitForTransaction(airdropDistributor.emitDistributionEvents(events));
 
   fs.writeFileSync("./merkle.json", JSON.stringify(merkle));
 }
