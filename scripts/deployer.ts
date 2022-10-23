@@ -8,7 +8,7 @@ import {
 import { AirdropDistributor } from "../types";
 
 export async function deployDistributor(
-  tokenAddress: string,
+  apAddress: string,
   distributed: ClaimableBalance[],
   claimed: ClaimableBalance[],
   log: Logger
@@ -21,9 +21,14 @@ export async function deployDistributor(
   const airdropDistributor = await deploy<AirdropDistributor>(
     "AirdropDistributor",
     log,
-    tokenAddress,
+    apAddress,
     distributorInfo.merkleRoot,
-    claimed
+    claimed.map(c => { 
+      return {
+        account: c.address,
+        amount: c.amount
+      }
+    })
   );
 
   return [airdropDistributor, distributorInfo];

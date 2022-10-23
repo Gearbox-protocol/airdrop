@@ -6,9 +6,10 @@
 
 import { deploy, waitForTransaction } from "@gearbox-protocol/devops";
 import { WAD } from "@gearbox-protocol/sdk";
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import "ethers";
-import { BigNumber } from "ethers";
+import { BigNumber, Signer } from "ethers";
 import { ethers } from "hardhat";
 import { Suite } from "mocha";
 import { Logger } from "tslog";
@@ -23,6 +24,7 @@ import {
   AirdropDistributor__factory,
   ERC20Mock,
 } from "../types";
+import { AddressProviderMock } from "../types/contracts/test/AddressProviderMock";
 
 const DUMB_ADDRESS = "0x5D4FF1249abf08F01AC57e1f5060BFfD55EC3692";
 const DUMB_ADDRESS2 = "0x7BAFC0D5c5892f2041FD9F2415A7611042218e22";
@@ -30,12 +32,24 @@ const DUMB_ADDRESS2 = "0x7BAFC0D5c5892f2041FD9F2415A7611042218e22";
 describe("Airdrop distributor tests", function (this: Suite) {
   this.timeout(0);
 
-  let airdropDistrubutor: AirdropDistributor;
+  let deployer: SignerWithAddress;
+  let treasury: SignerWithAddress;
+  let user: SignerWithAddress;
+
+  let airdropDistributor: AirdropDistributor;
   let info: AirdropDistributorInfo;
   let token: ERC20Mock;
   let log: Logger;
 
+  let claimed: Array<ClaimableBalance>;
+
   beforeEach(async () => {
+    const accounts = await ethers.getSigners();
+
+    deployer = accounts[0];
+    treasury = accounts[1];
+    user = accounts[2];
+
     log = new Logger();
 
     token = await deploy<ERC20Mock>(
@@ -46,36 +60,71 @@ describe("Airdrop distributor tests", function (this: Suite) {
       18
     );
 
-    const recipients: Array<ClaimableBalance> = [
-      { address: DUMB_ADDRESS, amount: BigNumber.from(1000).mul(WAD) },
-      { address: DUMB_ADDRESS2, amount: BigNumber.from(2000).mul(WAD) },
+    let addressProviderMock = await deploy<AddressProviderMock>(
+      "AddressProviderMock",
+      log,
+      token.address,
+      treasury.address
+    );
+
+    const distributed: Array<ClaimableBalance> = [
+      { address: DUMB_ADDRESS, amount: WAD.mul(1500)},
+      { address: DUMB_ADDRESS2, amount: WAD.mul(2000) },
     ];
 
-    [airdropDistrubutor, info] = await deployDistributor(
-      token.address,
-      recipients,
+    claimed = [
+      { address: DUMB_ADDRESS, amount: WAD.mul(500) },
+      { address: DUMB_ADDRESS2, amount: WAD.mul(200) }
+    ];
+
+    [airdropDistributor, info] = await deployDistributor(
+      addressProviderMock.address,
+      distributed,
+      claimed,
       log
     );
 
     await waitForTransaction(
-      token.mint(airdropDistrubutor.address, WAD.mul(3000))
+      token.mint(airdropDistributor.address, WAD.mul(3500))
     );
   });
 
   it(`[AD-1]: constructor sets correct parameters`, async () => {
-    expect(await airdropDistrubutor.merkleRoot()).to.be.eq(info.merkleRoot);
+    expect(await airdropDistributor.merkleRoot()).to.be.eq(info.merkleRoot);
 
-    expect(await airdropDistrubutor.token()).to.be.eq(token.address);
+    expect(await airdropDistributor.token()).to.be.eq(token.address);
+
+    expect(await airdropDistributor.claimed(DUMB_ADDRESS)).to.be.eq(WAD.mul(500));
+    expect(await airdropDistributor.claimed(DUMB_ADDRESS2)).to.be.eq(WAD.mul(200));
+  });
+
+  it(`[AD-1A]: constructor emits Claimed events`, async () => {
+    const tx = await deployer.provider?.getTransactionReceipt(airdropDistributor.deployTransaction.hash)
+
+    if (!tx) {
+      throw("Deploy tx receipt undefined")
+    }
+
+    tx.logs.slice(1).forEach((e, index) => {
+      const event = AirdropDistributor__factory.createInterface().decodeEventLog(
+        "Claimed",
+        e.data,
+        e.topics
+      );
+
+      expect(event.account).to.be.eq(claimed[index].address);
+      expect(event.amount).to.be.eq(claimed[index].amount);
+    })
   });
 
   it(`[AD-2]: claim works correctly`, async () => {
     const nodeInfo = info.claims[DUMB_ADDRESS];
 
     const tx = await waitForTransaction(
-      airdropDistrubutor.claim(
+      airdropDistributor.claim(
         nodeInfo.index,
         DUMB_ADDRESS,
-        WAD.mul(1000),
+        WAD.mul(1500),
         WAD.mul(500),
         nodeInfo.proof
       )
@@ -87,14 +136,13 @@ describe("Airdrop distributor tests", function (this: Suite) {
       tx.logs[1].topics
     );
 
-    expect(event.index).to.be.eq(nodeInfo.index);
     expect(event.account).to.be.eq(DUMB_ADDRESS);
     expect(event.amount).to.be.eq(WAD.mul(500));
 
     expect(await token.balanceOf(DUMB_ADDRESS)).to.be.eq(WAD.mul(500));
 
-    expect(await airdropDistrubutor.claimed(DUMB_ADDRESS)).to.be.eq(
-      WAD.mul(500)
+    expect(await airdropDistributor.claimed(DUMB_ADDRESS)).to.be.eq(
+      WAD.mul(1000)
     );
   });
 
@@ -102,19 +150,19 @@ describe("Airdrop distributor tests", function (this: Suite) {
     const nodeInfo = info.claims[DUMB_ADDRESS];
 
     await waitForTransaction(
-      airdropDistrubutor.claim(
+      airdropDistributor.claim(
         nodeInfo.index,
         DUMB_ADDRESS,
-        WAD.mul(1000),
+        WAD.mul(1500),
         WAD.mul(500),
         nodeInfo.proof
       )
     );
     await waitForTransaction(
-      airdropDistrubutor.claim(
+      airdropDistributor.claim(
         nodeInfo.index,
         DUMB_ADDRESS,
-        WAD.mul(1000),
+        WAD.mul(1500),
         WAD.mul(250),
         nodeInfo.proof
       )
@@ -122,8 +170,8 @@ describe("Airdrop distributor tests", function (this: Suite) {
 
     expect(await token.balanceOf(DUMB_ADDRESS)).to.be.eq(WAD.mul(750));
 
-    expect(await airdropDistrubutor.claimed(DUMB_ADDRESS)).to.be.eq(
-      WAD.mul(750)
+    expect(await airdropDistributor.claimed(DUMB_ADDRESS)).to.be.eq(
+      WAD.mul(1250)
     );
   });
 
@@ -131,7 +179,7 @@ describe("Airdrop distributor tests", function (this: Suite) {
     const nodeInfo = info.claims[DUMB_ADDRESS];
 
     expect(
-      airdropDistrubutor.claim(
+      airdropDistributor.claim(
         nodeInfo.index,
         DUMB_ADDRESS,
         WAD.mul(1001),
@@ -145,10 +193,10 @@ describe("Airdrop distributor tests", function (this: Suite) {
     const nodeInfo = info.claims[DUMB_ADDRESS];
 
     expect(
-      airdropDistrubutor.claim(
+      airdropDistributor.claim(
         nodeInfo.index,
         DUMB_ADDRESS,
-        WAD.mul(1000),
+        WAD.mul(1500),
         WAD.mul(1001),
         nodeInfo.proof
       )
@@ -159,14 +207,14 @@ describe("Airdrop distributor tests", function (this: Suite) {
 
   it(`[AD-6]: updateMerkleRoot works correctly`, async () => {
     const recipients: Array<ClaimableBalance> = [
-      { address: DUMB_ADDRESS, amount: BigNumber.from(1500).mul(WAD) },
+      { address: DUMB_ADDRESS, amount: BigNumber.from(2000).mul(WAD) },
       { address: DUMB_ADDRESS2, amount: BigNumber.from(2000).mul(WAD) },
     ];
 
     const newInfo = parseBalanceMap(recipients);
 
     const tx = await waitForTransaction(
-      airdropDistrubutor.updateMerkleRoot(newInfo.merkleRoot)
+      airdropDistributor.connect(treasury).updateMerkleRoot(newInfo.merkleRoot)
     );
 
     const event = AirdropDistributor__factory.createInterface().decodeEventLog(
@@ -178,40 +226,40 @@ describe("Airdrop distributor tests", function (this: Suite) {
     expect(event.oldRoot).to.be.eq(info.merkleRoot);
     expect(event.newRoot).to.be.eq(newInfo.merkleRoot);
 
-    expect(await airdropDistrubutor.merkleRoot()).to.be.eq(newInfo.merkleRoot);
+    expect(await airdropDistributor.merkleRoot()).to.be.eq(newInfo.merkleRoot);
   });
 
   it(`[AD-7]: subsequent claims work correctly after root update`, async () => {
     let nodeInfo = info.claims[DUMB_ADDRESS];
 
     await waitForTransaction(
-      airdropDistrubutor.claim(
+      airdropDistributor.claim(
         nodeInfo.index,
         DUMB_ADDRESS,
-        WAD.mul(1000),
+        WAD.mul(1500),
         WAD.mul(500),
         nodeInfo.proof
       )
     );
 
     const recipients: Array<ClaimableBalance> = [
-      { address: DUMB_ADDRESS, amount: BigNumber.from(1500).mul(WAD) },
+      { address: DUMB_ADDRESS, amount: BigNumber.from(2000).mul(WAD) },
       { address: DUMB_ADDRESS2, amount: BigNumber.from(2000).mul(WAD) },
     ];
 
     const newInfo = parseBalanceMap(recipients);
 
     await waitForTransaction(
-      airdropDistrubutor.updateMerkleRoot(newInfo.merkleRoot)
+      airdropDistributor.connect(treasury).updateMerkleRoot(newInfo.merkleRoot)
     );
 
     nodeInfo = newInfo.claims[DUMB_ADDRESS];
 
     await waitForTransaction(
-      airdropDistrubutor.claim(
+      airdropDistributor.claim(
         nodeInfo.index,
         DUMB_ADDRESS,
-        WAD.mul(1500),
+        WAD.mul(2000),
         WAD.mul(700),
         nodeInfo.proof
       )
@@ -219,15 +267,15 @@ describe("Airdrop distributor tests", function (this: Suite) {
 
     expect(await token.balanceOf(DUMB_ADDRESS)).to.be.eq(WAD.mul(1200));
 
-    expect(await airdropDistrubutor.claimed(DUMB_ADDRESS)).to.be.eq(
-      WAD.mul(1200)
+    expect(await airdropDistributor.claimed(DUMB_ADDRESS)).to.be.eq(
+      WAD.mul(1700)
     );
 
     expect(
-      airdropDistrubutor.claim(
+      airdropDistributor.claim(
         nodeInfo.index,
         DUMB_ADDRESS,
-        WAD.mul(1500),
+        WAD.mul(2000),
         WAD.mul(700),
         nodeInfo.proof
       )
@@ -251,7 +299,7 @@ describe("Airdrop distributor tests", function (this: Suite) {
     ];
 
     const tx = await waitForTransaction(
-      airdropDistrubutor.emitDistributionEvents(distrData)
+      airdropDistributor.emitDistributionEvents(distrData)
     );
 
     distrData.forEach((d, idx) => {
@@ -267,17 +315,18 @@ describe("Airdrop distributor tests", function (this: Suite) {
     });
   });
 
-  it(`[AD-9]: updateMerkleRoot and emitDistributionEvents revert on called by non-owner`, async () => {
-    const accounts = await ethers.getSigners();
-
-    const airdropDistributorDumb = airdropDistrubutor.connect(accounts[1]);
+  it(`[AD-9]: updateMerkleRoot and emitDistributionEvents revert on called by address with no access`, async () => {
 
     expect(
-      airdropDistributorDumb.updateMerkleRoot(info.merkleRoot)
+      airdropDistributor.connect(user).updateMerkleRoot(info.merkleRoot)
+    ).to.be.revertedWith("TreasuryOnlyException()");
+
+    expect(
+      airdropDistributor.connect(user).emitDistributionEvents([])
     ).to.be.revertedWith("Ownable: caller is not the owner");
 
     expect(
-      airdropDistributorDumb.emitDistributionEvents([])
-    ).to.be.revertedWith("Ownable: caller is not the owner");
+      airdropDistributor.connect(deployer).updateMerkleRoot(info.merkleRoot)
+    ).to.be.revertedWith("TreasuryOnlyException()");
   });
 });
