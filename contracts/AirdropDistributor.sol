@@ -11,6 +11,9 @@ contract AirdropDistributor is Ownable, IAirdropDistributor {
     /// @dev Emits each time when call not by treasury
     error TreasuryOnlyException();
 
+    /// @dev Emits if already claimed is forbidden
+    error AlreadyClaimedFinishedException();
+
     /// @dev Returns the token distributed by the contract
     IERC20 public immutable override token;
 
@@ -36,17 +39,7 @@ contract AirdropDistributor is Ownable, IAirdropDistributor {
         token = IERC20(IAddressProvider(addressProvider).getGearToken());
         treasury = IAddressProvider(addressProvider).getTreasuryContract();
         merkleRoot = merkleRoot_;
-
-        uint256 len = alreadyClaimed.length;
-        unchecked {
-            for (uint256 i = 0; i < len; ++i) {
-                claimed[alreadyClaimed[i].account] = alreadyClaimed[i].amount;
-                emit Claimed(
-                    alreadyClaimed[i].account,
-                    alreadyClaimed[i].amount
-                );
-            }
-        }
+        _updateHistoricClaims(alreadyClaimed);
     }
 
     function updateMerkleRoot(bytes32 newRoot) external treasuryOnly {
@@ -66,6 +59,28 @@ contract AirdropDistributor is Ownable, IAirdropDistributor {
                     data[i].account,
                     data[i].campaignId,
                     data[i].amount
+                );
+            }
+        }
+    }
+
+    function updateHistoricClaims(ClaimedData[] memory alreadyClaimed)
+        external
+        onlyOwner
+    {
+        _updateHistoricClaims(alreadyClaimed);
+    }
+
+    function _updateHistoricClaims(ClaimedData[] memory alreadyClaimed)
+        internal
+    {
+        uint256 len = alreadyClaimed.length;
+        unchecked {
+            for (uint256 i = 0; i < len; ++i) {
+                emit Claimed(
+                    alreadyClaimed[i].account,
+                    alreadyClaimed[i].amount,
+                    true
                 );
             }
         }
@@ -92,6 +107,6 @@ contract AirdropDistributor is Ownable, IAirdropDistributor {
         claimed[account] += claimedAmount;
         token.transfer(account, claimedAmount);
 
-        emit Claimed(account, claimedAmount);
+        emit Claimed(account, claimedAmount, false);
     }
 }

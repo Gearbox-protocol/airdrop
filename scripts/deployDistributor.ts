@@ -1,8 +1,4 @@
-import {
-  detectNetwork,
-  Verifier,
-  waitForTransaction,
-} from "@gearbox-protocol/devops";
+import { detectNetwork, waitForTransaction } from "@gearbox-protocol/devops";
 import { getNetworkType } from "@gearbox-protocol/sdk";
 import * as dotenv from "dotenv";
 import { BigNumber } from "ethers";
@@ -13,6 +9,7 @@ import { campaigns } from "../airdrops";
 import { ClaimableBalance } from "../merkle/parse-accounts";
 import { DistributionDataStruct } from "../types/contracts/AirdropDistributor";
 import { deployDistributor } from "./deployer";
+import { mapToClaimed } from "./lib";
 
 interface InitialClaim {
   distributed: Array<ClaimableBalance>;
@@ -20,11 +17,23 @@ interface InitialClaim {
   events: Array<DistributionDataStruct>;
 }
 
-export const mapToClaimed = (map: Record<string, BigNumber>) =>
-  Object.entries(map).map(([address, amount]) => ({
-    address,
-    amount,
-  }));
+const fee = {
+  maxFeePerGas: BigNumber.from(55e9),
+  maxPriorityFeePerGas: BigNumber.from(50e9),
+};
+
+function cutIntoChuncks<T>(
+  array: Array<T>,
+  chunkSize: number
+): Array<Array<T>> {
+  const result: Array<Array<T>> = [];
+
+  for (let i = 0; i < array.length; i += chunkSize) {
+    const chunk = array.slice(i, i + chunkSize);
+    result.push(chunk);
+  }
+  return result;
+}
 
 export function getInitialSetup(): InitialClaim {
   const distributed: Record<string, BigNumber> = {};
@@ -33,10 +42,12 @@ export function getInitialSetup(): InitialClaim {
 
   for (const c of campaigns) {
     c.distributed.forEach((data) => {
-      const amount = BigNumber.from(1e18).mul(data.amount);
+      const amount = BigNumber.from(10).pow(18).mul(data.amount);
       const account = data.address.toLowerCase();
 
-      distributed[account] = distributed[account].add(amount);
+      distributed[account] = (distributed[account] || BigNumber.from(0)).add(
+        amount
+      );
       events.push({
         account,
         campaignId: c.campaign,
@@ -45,15 +56,18 @@ export function getInitialSetup(): InitialClaim {
     });
 
     c.claimed.forEach((data) => {
-      const amount = BigNumber.from(1e18).mul(data.amount);
+      const amount = BigNumber.from(10).pow(18).mul(data.amount);
       const account = data.address.toLowerCase();
 
-      claimed[account] = claimed[account].add(amount);
+      claimed[account] = (claimed[account] || BigNumber.from(0)).add(amount);
+      distributed[account] = (distributed[account] || BigNumber.from(0)).sub(
+        amount
+      );
     });
   }
 
   const result: InitialClaim = {
-    distributed: mapToClaimed(distributed),
+    distributed: mapToClaimed(distributed).filter((e) => !e.amount.isZero()),
     claimed: mapToClaimed(claimed),
     events,
   };
@@ -65,43 +79,66 @@ async function deployDistributorLive() {
   const accounts = await ethers.getSigners();
   const deployer = accounts[0];
 
+  console.log(`Deployer: ${deployer.address}`);
+
   const chainId = await deployer.getChainId();
 
   const networkType =
     chainId === 1337 ? await detectNetwork() : getNetworkType(chainId);
 
-  if (networkType == "Goerli") {
-    dotenv.config({ path: ".env.goerli" });
-  } else if (networkType == "Mainnet") {
-    dotenv.config({ path: ".env.mainnet" });
-  }
+  dotenv.config({
+    path: networkType == "Goerli" ? ".env.goerli" : ".env.mainnet",
+  });
 
-  const GEAR_TOKEN = process.env.REACT_APP_GEAR_TOKEN || "";
+  const ADDRESS_PROVIDER = process.env.REACT_APP_ADDRESS_PROVIDER || "";
 
-  if (GEAR_TOKEN === "") {
-    throw new Error("GEAR token address unknown");
+  console.log(`Address provider: ${ADDRESS_PROVIDER}`);
+
+  if (ADDRESS_PROVIDER === "") {
+    throw new Error("ADDRESS_PROVIDER token address unknown");
   }
 
   const log = new Logger();
-  const verifier = new Verifier();
 
   dotenv.config();
 
   const { distributed, claimed, events } = getInitialSetup();
 
+  const claimedChunks = cutIntoChuncks(claimed, 1500);
+
   const [airdropDistributor, merkle] = await deployDistributor(
-    GEAR_TOKEN,
+    ADDRESS_PROVIDER,
     distributed,
-    claimed,
-    log
+    claimedChunks[0],
+    log,
+    fee
   );
 
-  verifier.addContract({
-    address: airdropDistributor.address,
-    constructorArguments: [GEAR_TOKEN, merkle.merkleRoot],
-  });
+  for (let i = 1; i < claimedChunks.length; i++) {
+    log.debug(`Adding claimed events ${i} of ${claimedChunks.length}`);
+    const receipt = await waitForTransaction(
+      airdropDistributor.updateHistoricClaims(
+        claimedChunks[i].map((c) => ({
+          account: c.address,
+          amount: c.amount,
+        })),
+        fee
+      )
+    );
 
-  await waitForTransaction(airdropDistributor.emitDistributionEvents(events));
+    log.debug(`Gas used: ${receipt.gasUsed}`);
+  }
+
+  const eventsChunks = cutIntoChuncks(events, 1000);
+  let i = 1;
+  for (const chunk of eventsChunks) {
+    log.debug(`Adding distributed events ${i} of ${eventsChunks.length}`);
+    const receipt = await waitForTransaction(
+      airdropDistributor.emitDistributionEvents(chunk, fee)
+    );
+    log.debug(`Gas used: ${receipt.gasUsed}`);
+    i++;
+  }
 
   fs.writeFileSync("./merkle.json", JSON.stringify(merkle));
 }

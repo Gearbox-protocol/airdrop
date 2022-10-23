@@ -9,7 +9,7 @@ import { WAD } from "@gearbox-protocol/sdk";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import "ethers";
-import { BigNumber, Signer } from "ethers";
+import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
 import { Suite } from "mocha";
 import { Logger } from "tslog";
@@ -68,13 +68,13 @@ describe("Airdrop distributor tests", function (this: Suite) {
     );
 
     const distributed: Array<ClaimableBalance> = [
-      { address: DUMB_ADDRESS, amount: WAD.mul(1500)},
+      { address: DUMB_ADDRESS, amount: WAD.mul(1500) },
       { address: DUMB_ADDRESS2, amount: WAD.mul(2000) },
     ];
 
     claimed = [
       { address: DUMB_ADDRESS, amount: WAD.mul(500) },
-      { address: DUMB_ADDRESS2, amount: WAD.mul(200) }
+      { address: DUMB_ADDRESS2, amount: WAD.mul(200) },
     ];
 
     [airdropDistributor, info] = await deployDistributor(
@@ -94,27 +94,34 @@ describe("Airdrop distributor tests", function (this: Suite) {
 
     expect(await airdropDistributor.token()).to.be.eq(token.address);
 
-    expect(await airdropDistributor.claimed(DUMB_ADDRESS)).to.be.eq(WAD.mul(500));
-    expect(await airdropDistributor.claimed(DUMB_ADDRESS2)).to.be.eq(WAD.mul(200));
+    expect(await airdropDistributor.claimed(DUMB_ADDRESS)).to.be.eq(
+      WAD.mul(500)
+    );
+    expect(await airdropDistributor.claimed(DUMB_ADDRESS2)).to.be.eq(
+      WAD.mul(200)
+    );
   });
 
   it(`[AD-1A]: constructor emits Claimed events`, async () => {
-    const tx = await deployer.provider?.getTransactionReceipt(airdropDistributor.deployTransaction.hash)
+    const tx = await deployer.provider?.getTransactionReceipt(
+      airdropDistributor.deployTransaction.hash
+    );
 
     if (!tx) {
-      throw("Deploy tx receipt undefined")
+      throw "Deploy tx receipt undefined";
     }
 
     tx.logs.slice(1).forEach((e, index) => {
-      const event = AirdropDistributor__factory.createInterface().decodeEventLog(
-        "Claimed",
-        e.data,
-        e.topics
-      );
+      const event =
+        AirdropDistributor__factory.createInterface().decodeEventLog(
+          "Claimed",
+          e.data,
+          e.topics
+        );
 
       expect(event.account).to.be.eq(claimed[index].address);
       expect(event.amount).to.be.eq(claimed[index].amount);
-    })
+    });
   });
 
   it(`[AD-2]: claim works correctly`, async () => {
@@ -316,7 +323,6 @@ describe("Airdrop distributor tests", function (this: Suite) {
   });
 
   it(`[AD-9]: updateMerkleRoot and emitDistributionEvents revert on called by address with no access`, async () => {
-
     expect(
       airdropDistributor.connect(user).updateMerkleRoot(info.merkleRoot)
     ).to.be.revertedWith("TreasuryOnlyException()");

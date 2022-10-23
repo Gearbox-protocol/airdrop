@@ -16,7 +16,11 @@ struct ClaimedData {
 
 interface IAirdropDistributorEvents {
     /// @dev Emits when a user claims tokens
-    event Claimed(address indexed account, uint256 indexed amount);
+    event Claimed(
+        address indexed account,
+        uint256 indexed amount,
+        bool indexed historic
+    );
 
     /// @dev Emits when the owner replaces the merkle root
     event RootUpdated(bytes32 oldRoot, bytes32 indexed newRoot);
