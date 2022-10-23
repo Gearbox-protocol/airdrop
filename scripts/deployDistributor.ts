@@ -9,7 +9,7 @@ import { BigNumber } from "ethers";
 import * as fs from "fs";
 import { ethers } from "hardhat";
 import { Logger } from "tslog";
-import { campaigns } from "../airdrops/0_types";
+import { campaigns } from "../airdrops";
 import { ClaimableBalance } from "../merkle/parse-accounts";
 import { DistributionDataStruct } from "../types/contracts/AirdropDistributor";
 import { deployDistributor } from "./deployer";

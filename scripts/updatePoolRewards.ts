@@ -7,7 +7,7 @@ import {
 import { BigNumber } from "ethers";
 import * as fs from "fs";
 import { ethers } from "hardhat";
-import { campaigns } from "../airdrops/0_types";
+import { campaigns } from "../airdrops";
 import { parseBalanceMap } from "../merkle/parse-accounts";
 import { mapToClaimed } from "./deployDistributor";
 
