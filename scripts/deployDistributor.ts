@@ -18,8 +18,8 @@ interface InitialClaim {
 }
 
 const fee = {
-  maxFeePerGas: BigNumber.from(55e9),
-  maxPriorityFeePerGas: BigNumber.from(50e9),
+  maxFeePerGas: BigNumber.from(255e9),
+  maxPriorityFeePerGas: BigNumber.from(250e9),
 };
 
 function cutIntoChuncks<T>(
