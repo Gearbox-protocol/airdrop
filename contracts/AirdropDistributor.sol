@@ -90,12 +90,11 @@ contract AirdropDistributor is Ownable, IAirdropDistributor {
         uint256 index,
         address account,
         uint256 totalAmount,
-        uint256 claimedAmount,
         bytes32[] calldata merkleProof
     ) external override {
         require(
-            claimed[account] + claimedAmount <= totalAmount,
-            "MerkleDistributor: Total claimed amount is more than total rewards"
+            claimed[account] < totalAmount,
+            "MerkleDistributor: Nothing to claim"
         );
 
         bytes32 node = keccak256(abi.encodePacked(index, account, totalAmount));
@@ -104,7 +103,7 @@ contract AirdropDistributor is Ownable, IAirdropDistributor {
             "MerkleDistributor: Invalid proof."
         );
 
-        claimed[account] += claimedAmount;
+        uint256 claimedAmount = totalAmount - claimed[account];
         token.transfer(account, claimedAmount);
 
         emit Claimed(account, claimedAmount, false);

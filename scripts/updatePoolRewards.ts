@@ -74,7 +74,7 @@ export async function updatePoolRewards() {
   );
 
   fs.writeFileSync(
-    `./merkle_${network.toLowerCase()}_${toBlock}.json`,
+    `./merkle_${distributorInfo.merkleRoot.replaceAll("0x", "")}.json`,
     JSON.stringify(distributorInfo)
   );
 }

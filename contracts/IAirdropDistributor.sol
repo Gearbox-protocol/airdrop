@@ -18,7 +18,7 @@ interface IAirdropDistributorEvents {
     /// @dev Emits when a user claims tokens
     event Claimed(
         address indexed account,
-        uint256 indexed amount,
+        uint256 amount,
         bool indexed historic
     );
 
@@ -50,7 +50,6 @@ interface IAirdropDistributor is IAirdropDistributorEvents {
         uint256 index,
         address account,
         uint256 totalAmount,
-        uint256 claimedAmount,
         bytes32[] calldata merkleProof
     ) external;
 }
