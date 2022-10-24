@@ -104,6 +104,7 @@ contract AirdropDistributor is Ownable, IAirdropDistributor {
         );
 
         uint256 claimedAmount = totalAmount - claimed[account];
+        claimed[account] += claimedAmount;
         token.transfer(account, claimedAmount);
 
         emit Claimed(account, claimedAmount, false);

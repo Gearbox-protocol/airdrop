@@ -81,7 +81,8 @@ describe("Airdrop distributor tests", function (this: Suite) {
       addressProviderMock.address,
       distributed,
       claimed,
-      log
+      log,
+      {}
     );
 
     await waitForTransaction(
@@ -93,13 +94,6 @@ describe("Airdrop distributor tests", function (this: Suite) {
     expect(await airdropDistributor.merkleRoot()).to.be.eq(info.merkleRoot);
 
     expect(await airdropDistributor.token()).to.be.eq(token.address);
-
-    expect(await airdropDistributor.claimed(DUMB_ADDRESS)).to.be.eq(
-      WAD.mul(500)
-    );
-    expect(await airdropDistributor.claimed(DUMB_ADDRESS2)).to.be.eq(
-      WAD.mul(200)
-    );
   });
 
   it(`[AD-1A]: constructor emits Claimed events`, async () => {
@@ -132,7 +126,6 @@ describe("Airdrop distributor tests", function (this: Suite) {
         nodeInfo.index,
         DUMB_ADDRESS,
         WAD.mul(1500),
-        WAD.mul(500),
         nodeInfo.proof
       )
     );
@@ -144,41 +137,12 @@ describe("Airdrop distributor tests", function (this: Suite) {
     );
 
     expect(event.account).to.be.eq(DUMB_ADDRESS);
-    expect(event.amount).to.be.eq(WAD.mul(500));
+    expect(event.amount).to.be.eq(WAD.mul(1500));
 
-    expect(await token.balanceOf(DUMB_ADDRESS)).to.be.eq(WAD.mul(500));
-
-    expect(await airdropDistributor.claimed(DUMB_ADDRESS)).to.be.eq(
-      WAD.mul(1000)
-    );
-  });
-
-  it(`[AD-3]: successive claims work correctly`, async () => {
-    const nodeInfo = info.claims[DUMB_ADDRESS];
-
-    await waitForTransaction(
-      airdropDistributor.claim(
-        nodeInfo.index,
-        DUMB_ADDRESS,
-        WAD.mul(1500),
-        WAD.mul(500),
-        nodeInfo.proof
-      )
-    );
-    await waitForTransaction(
-      airdropDistributor.claim(
-        nodeInfo.index,
-        DUMB_ADDRESS,
-        WAD.mul(1500),
-        WAD.mul(250),
-        nodeInfo.proof
-      )
-    );
-
-    expect(await token.balanceOf(DUMB_ADDRESS)).to.be.eq(WAD.mul(750));
+    expect(await token.balanceOf(DUMB_ADDRESS)).to.be.eq(WAD.mul(1500));
 
     expect(await airdropDistributor.claimed(DUMB_ADDRESS)).to.be.eq(
-      WAD.mul(1250)
+      WAD.mul(1500)
     );
   });
 
@@ -190,25 +154,30 @@ describe("Airdrop distributor tests", function (this: Suite) {
         nodeInfo.index,
         DUMB_ADDRESS,
         WAD.mul(1001),
-        WAD.mul(500),
         nodeInfo.proof
       )
     ).to.be.revertedWith("MerkleDistributor: Invalid proof.");
   });
 
-  it(`[AD-5]: claim reverts on attempting to claim more than total amount`, async () => {
+  it(`[AD-5]: claim reverts on attempting to claim zero`, async () => {
     const nodeInfo = info.claims[DUMB_ADDRESS];
+
+    await airdropDistributor.claim(
+      nodeInfo.index,
+      DUMB_ADDRESS,
+      WAD.mul(1500),
+      nodeInfo.proof
+    );
 
     expect(
       airdropDistributor.claim(
         nodeInfo.index,
         DUMB_ADDRESS,
         WAD.mul(1500),
-        WAD.mul(1001),
         nodeInfo.proof
       )
     ).to.be.revertedWith(
-      "MerkleDistributor: Total claimed amount is more than total rewards"
+      "MerkleDistributor: Nothing to claim"
     );
   });
 
@@ -244,7 +213,6 @@ describe("Airdrop distributor tests", function (this: Suite) {
         nodeInfo.index,
         DUMB_ADDRESS,
         WAD.mul(1500),
-        WAD.mul(500),
         nodeInfo.proof
       )
     );
@@ -267,15 +235,14 @@ describe("Airdrop distributor tests", function (this: Suite) {
         nodeInfo.index,
         DUMB_ADDRESS,
         WAD.mul(2000),
-        WAD.mul(700),
         nodeInfo.proof
       )
     );
 
-    expect(await token.balanceOf(DUMB_ADDRESS)).to.be.eq(WAD.mul(1200));
+    expect(await token.balanceOf(DUMB_ADDRESS)).to.be.eq(WAD.mul(2000));
 
     expect(await airdropDistributor.claimed(DUMB_ADDRESS)).to.be.eq(
-      WAD.mul(1700)
+      WAD.mul(2000)
     );
 
     expect(
@@ -283,11 +250,10 @@ describe("Airdrop distributor tests", function (this: Suite) {
         nodeInfo.index,
         DUMB_ADDRESS,
         WAD.mul(2000),
-        WAD.mul(700),
         nodeInfo.proof
       )
     ).to.be.revertedWith(
-      "MerkleDistributor: Total claimed amount is more than total rewards"
+      "MerkleDistributor: Nothing to claim"
     );
   });
 
