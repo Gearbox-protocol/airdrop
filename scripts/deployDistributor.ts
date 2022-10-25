@@ -18,8 +18,8 @@ interface InitialClaim {
 }
 
 const fee = {
-  maxFeePerGas: BigNumber.from(255e9),
-  maxPriorityFeePerGas: BigNumber.from(250e9),
+  maxFeePerGas: BigNumber.from(15e9),
+  maxPriorityFeePerGas: BigNumber.from(4e9),
 };
 
 function cutIntoChuncks<T>(
@@ -133,6 +133,11 @@ async function deployDistributorLive() {
   let i = 1;
   for (const chunk of eventsChunks) {
     log.debug(`Adding distributed events ${i} of ${eventsChunks.length}`);
+    if (i < 4) {
+      log.warn("SKIPPED");
+      i++;
+      continue;
+    }
     const receipt = await waitForTransaction(
       airdropDistributor.emitDistributionEvents(chunk, fee)
     );
