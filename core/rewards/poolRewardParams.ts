@@ -31,7 +31,7 @@ const GEAR_PER_BLOCK: Record<DieselTokenTypes, number> = {
   dwstETH: 1636,
 };
 
-export const GOERLI_BLOCK = 7694030;
+const GOERLI_BLOCK = 7694030;
 
 poolRewardsPerBlock.Goerli.dDAI.addValue(
   GOERLI_BLOCK,
@@ -54,7 +54,7 @@ poolRewardsPerBlock.Goerli.dwstETH.addValue(
   BigNumber.from(10).pow(18).mul(GEAR_PER_BLOCK.dwstETH).div(100)
 );
 
-export const MAINNET_BLOCK = 15820000;
+const MAINNET_BLOCK = 15820000;
 
 poolRewardsPerBlock.Mainnet.dDAI.addValue(
   MAINNET_BLOCK,
