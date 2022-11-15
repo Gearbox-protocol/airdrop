@@ -23,7 +23,7 @@ export const poolRewardsPerBlock: Record<
   },
 };
 
-export const GEAR_PER_BLOCK: Record<DieselTokenTypes, number> = {
+const GEAR_PER_BLOCK: Record<DieselTokenTypes, number> = {
   dDAI: 2283,
   dUSDC: 2283,
   dWETH: 3196,

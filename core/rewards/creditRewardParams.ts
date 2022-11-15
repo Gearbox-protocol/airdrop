@@ -31,7 +31,7 @@ export const creditRewardsPerBlock: Record<CreditManagersV2, RangedValue> = {
   [CREDIT_MANAGER_WBTC_V2_GOERLI]: new RangedValue(),
 };
 
-export const GEAR_PER_BLOCK: Record<DieselTokenTypes, number> = {
+const GEAR_PER_BLOCK: Record<DieselTokenTypes, number> = {
   dDAI: 166,
   dUSDC: 166,
   dWETH: 230,
