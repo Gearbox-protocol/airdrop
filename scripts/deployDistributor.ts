@@ -5,8 +5,9 @@ import { BigNumber } from "ethers";
 import * as fs from "fs";
 import { ethers } from "hardhat";
 import { Logger } from "tslog";
-import { campaigns } from "../airdrops";
-import { ClaimableBalance } from "../merkle/parse-accounts";
+import { campaigns } from "../campaigns";
+import { ClaimableBalance } from "../core/merkle/parse-accounts";
+
 import { DistributionDataStruct } from "../types/contracts/AirdropDistributor";
 import { deployDistributor } from "./deployer";
 import { mapToClaimed } from "./lib";
@@ -17,10 +18,7 @@ interface InitialClaim {
   events: Array<DistributionDataStruct>;
 }
 
-const fee = {
-  maxFeePerGas: BigNumber.from(15e9),
-  maxPriorityFeePerGas: BigNumber.from(4e9),
-};
+const fee = {};
 
 function cutIntoChuncks<T>(
   array: Array<T>,

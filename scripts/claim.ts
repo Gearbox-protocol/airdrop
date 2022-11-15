@@ -2,10 +2,14 @@ import { waitForTransaction } from "@gearbox-protocol/devops";
 import { ethers } from "hardhat";
 import merkleData from "../merkle.json";
 import { AirdropDistributor__factory } from "../types";
-import { AirdropDistributorInfo } from "../merkle/parse-accounts";
+import { AirdropDistributorInfo } from "../core/parse-accounts";
 import { BigNumberish } from "ethers";
 
-async function claim(distributorAddress: string, account: string, claimedAmount: BigNumberish) {
+async function claim(
+  distributorAddress: string,
+  account: string,
+  claimedAmount: BigNumberish
+) {
   const accounts = await ethers.getSigners();
   const deployer = accounts[0];
 
