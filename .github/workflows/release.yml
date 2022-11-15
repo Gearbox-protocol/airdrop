@@ -19,7 +19,7 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT }}
           projectName: ${{ secrets.CF_PROJECT_NAME }}
-          directory: public
+          directory: merkle
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
           # Replace master with main, because by default cloudflare uses 'main' as production branch
           branch: ${{ github.ref_name == 'master' && 'main' || github.ref_name }}
