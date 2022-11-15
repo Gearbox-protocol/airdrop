@@ -39,7 +39,7 @@ const GEAR_PER_BLOCK: Record<DieselTokenTypes, number> = {
   dwstETH: 118,
 };
 
-export const GOERLI_BLOCK = 7694030;
+const GOERLI_BLOCK = 7694030;
 
 creditRewardsPerBlock[CREDIT_MANAGER_DAI_V2_GOERLI].addValue(
   GOERLI_BLOCK,
@@ -62,7 +62,7 @@ creditRewardsPerBlock[CREDIT_MANAGER_WBTC_V2_GOERLI].addValue(
   BigNumber.from(10).pow(18).mul(GEAR_PER_BLOCK.dWBTC).div(100)
 );
 
-export const MAINNET_BLOCK = 15724000;
+const MAINNET_BLOCK = 15724000;
 
 creditRewardsPerBlock[CREDIT_MANAGER_DAI_V2_MAINNET].addValue(
   MAINNET_BLOCK,
