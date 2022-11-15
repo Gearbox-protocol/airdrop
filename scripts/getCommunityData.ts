@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
-import { AirdropBalance } from "../airdrops";
+import { AirdropBalance } from "../campaigns";
 import merkle from "./old/merkle_community.json";
 import { IMerkleDistributor__factory } from "../types/factories/contracts/old";
 

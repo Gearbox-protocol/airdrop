@@ -17,7 +17,7 @@ import {
   AirdropDistributorInfo,
   ClaimableBalance,
   parseBalanceMap,
-} from "../merkle/parse-accounts";
+} from "../core/parse-accounts";
 import { deployDistributor } from "../scripts/deployer";
 import {
   AirdropDistributor,
@@ -176,9 +176,7 @@ describe("Airdrop distributor tests", function (this: Suite) {
         WAD.mul(1500),
         nodeInfo.proof
       )
-    ).to.be.revertedWith(
-      "MerkleDistributor: Nothing to claim"
-    );
+    ).to.be.revertedWith("MerkleDistributor: Nothing to claim");
   });
 
   it(`[AD-6]: updateMerkleRoot works correctly`, async () => {
@@ -252,9 +250,7 @@ describe("Airdrop distributor tests", function (this: Suite) {
         WAD.mul(2000),
         nodeInfo.proof
       )
-    ).to.be.revertedWith(
-      "MerkleDistributor: Nothing to claim"
-    );
+    ).to.be.revertedWith("MerkleDistributor: Nothing to claim");
   });
 
   it(`[AD-8]: emitDistributionEvents correctly emits events`, async () => {
