@@ -9,9 +9,9 @@ import {
   OpenCreditAccountEvent,
   TransferAccountEvent,
 } from "@gearbox-protocol/sdk/lib/types/@gearbox-protocol/core-v2/contracts/interfaces/ICreditFacade.sol/ICreditFacade";
+import { TypedEvent } from "@gearbox-protocol/sdk/lib/types/common";
 import { BigNumber, providers } from "ethers";
 
-import { TypedEvent } from "../../types/common";
 import { creditRewardsPerBlock } from "./creditRewardParams";
 import { Reward } from "./poolRewards";
 import { RangedValue } from "./range";
