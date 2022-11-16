@@ -29,20 +29,18 @@ contract ERC20Mock is ERC20, Ownable {
         return _decimals;
     }
 
-    function mint(address to, uint256 amount)
-        external
-        minterOnly
-        returns (bool)
-    {
+    function mint(
+        address to,
+        uint256 amount
+    ) external minterOnly returns (bool) {
         _mint(to, amount);
         return true;
     }
 
-    function burnFrom(address to, uint256 amount)
-        external
-        minterOnly
-        returns (bool)
-    {
+    function burnFrom(
+        address to,
+        uint256 amount
+    ) external minterOnly returns (bool) {
         _burn(to, amount);
         return true;
     }

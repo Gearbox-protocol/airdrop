@@ -4,8 +4,8 @@ pragma solidity ^0.8.10;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
-import {IAddressProvider} from "@gearbox-protocol/core-v2/contracts/interfaces/IAddressProvider.sol";
-import {IAirdropDistributor, DistributionData, ClaimedData} from "./IAirdropDistributor.sol";
+import { IAddressProvider } from "@gearbox-protocol/core-v2/contracts/interfaces/IAddressProvider.sol";
+import { IAirdropDistributor, DistributionData, ClaimedData } from "./IAirdropDistributor.sol";
 
 contract AirdropDistributor is Ownable, IAirdropDistributor {
     /// @dev Emits each time when call not by treasury
@@ -48,10 +48,9 @@ contract AirdropDistributor is Ownable, IAirdropDistributor {
         emit RootUpdated(oldRoot, newRoot);
     }
 
-    function emitDistributionEvents(DistributionData[] calldata data)
-        external
-        onlyOwner
-    {
+    function emitDistributionEvents(
+        DistributionData[] calldata data
+    ) external onlyOwner {
         uint256 len = data.length;
         unchecked {
             for (uint256 i = 0; i < len; ++i) {
@@ -64,16 +63,15 @@ contract AirdropDistributor is Ownable, IAirdropDistributor {
         }
     }
 
-    function updateHistoricClaims(ClaimedData[] memory alreadyClaimed)
-        external
-        onlyOwner
-    {
+    function updateHistoricClaims(
+        ClaimedData[] memory alreadyClaimed
+    ) external onlyOwner {
         _updateHistoricClaims(alreadyClaimed);
     }
 
-    function _updateHistoricClaims(ClaimedData[] memory alreadyClaimed)
-        internal
-    {
+    function _updateHistoricClaims(
+        ClaimedData[] memory alreadyClaimed
+    ) internal {
         uint256 len = alreadyClaimed.length;
         unchecked {
             for (uint256 i = 0; i < len; ++i) {
