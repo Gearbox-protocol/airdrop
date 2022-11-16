@@ -82,15 +82,6 @@ export async function updatePoolRewards() {
         amount,
       );
     });
-
-    c.claimed.forEach(data => {
-      const amount = BigNumber.from(10).pow(18).mul(data.amount);
-      const account = data.address.toLowerCase();
-
-      distributed[account] = (distributed[account] || BigNumber.from(0)).sub(
-        amount,
-      );
-    });
   }
 
   const dieselTokens: Array<SupportedToken> = [
@@ -141,7 +132,6 @@ export async function updatePoolRewards() {
       cm,
       deployer.provider!,
     );
-
     creditRewards.forEach(reward => {
       distributed[reward.address] = (
         distributed[reward.address] || BigNumber.from(0)
@@ -156,12 +146,10 @@ export async function updatePoolRewards() {
   });
 
   const claimed = await distributor.queryFilter(
-    distributor.filters.Claimed(null, null, false),
+    distributor.filters.Claimed(),
     0,
     lastBlock,
   );
-
-  console.log(claimed);
 
   const totalClaimed = claimed.reduce(
     (a, b) => a.add(b.args.amount),
@@ -189,6 +177,8 @@ export async function updatePoolRewards() {
     )}.json`,
     JSON.stringify(distributorInfo),
   );
+
+  console.log(`Last merkle: ${distributorInfo.merkleRoot}`);
 }
 
 updatePoolRewards()

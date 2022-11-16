@@ -29,8 +29,8 @@
     "lint:ci": "eslint \"**/*.ts\"",
     "typecheck:ci": "tsc --noEmit",
     "test": "npx mocha --require ts-node/register core/**/*.spec.ts",
-    "update": "npx hardhat run scripts/updateRewards.ts -- network mainnet",
-    "update-goerli": "npx hardhat run scripts/updateRewards.ts -- network goerli"
+    "update": "npx hardhat run scripts/updateRewards.ts --network mainnet",
+    "update-goerli": "npx hardhat run scripts/updateRewards.ts --network goerli"
   },
   "dependencies": {},
   "devDependencies": {

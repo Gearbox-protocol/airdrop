@@ -18,7 +18,10 @@ interface InitialClaim {
   events: Array<DistributionDataStruct>;
 }
 
-const fee = {};
+const fee = {
+  maxFeePerGas: BigNumber.from(233e9),
+  maxPriorityFeePerGas: BigNumber.from(23e9),
+};
 
 function cutIntoChuncks<T>(
   array: Array<T>,
@@ -81,11 +84,11 @@ async function deployDistributorLive() {
 
   const chainId = await deployer.getChainId();
 
-  const networkType =
+  const network =
     chainId === 1337 ? await detectNetwork() : getNetworkType(chainId);
 
   dotenv.config({
-    path: networkType === "Goerli" ? ".env.goerli" : ".env.mainnet",
+    path: network === "Goerli" ? ".env.goerli" : ".env.mainnet",
   });
 
   const ADDRESS_PROVIDER = process.env.REACT_APP_ADDRESS_PROVIDER || "";
@@ -104,7 +107,7 @@ async function deployDistributorLive() {
 
   const claimedChunks = cutIntoChuncks(claimed, 1500);
 
-  const [airdropDistributor, merkle] = await deployDistributor(
+  const [airdropDistributor, distributorInfo] = await deployDistributor(
     ADDRESS_PROVIDER,
     distributed,
     claimedChunks[0],
@@ -143,7 +146,13 @@ async function deployDistributorLive() {
     i++;
   }
 
-  fs.writeFileSync("./merkle.json", JSON.stringify(merkle));
+  fs.writeFileSync(
+    `./merkle/${network.toLowerCase()}_${distributorInfo.merkleRoot.replace(
+      "0x",
+      "",
+    )}.json`,
+    JSON.stringify(distributorInfo),
+  );
 }
 
 deployDistributorLive()
