@@ -5,7 +5,7 @@ import {
   AirdropDistributorInfo,
   ClaimableBalance,
   parseBalanceMap,
-} from "../core/parse-accounts";
+} from "../core/merkle/parse-accounts";
 import { AirdropDistributor } from "../types";
 
 export async function deployDistributor(

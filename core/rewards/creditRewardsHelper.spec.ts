@@ -18,12 +18,12 @@ import { BigNumber } from "ethers";
 const cfi = ICreditFacade__factory.createInterface();
 
 const bnToU256 = (bn: BigNumber) => {
-  const hexValue = bn.toHexString().replaceAll("0x", "");
+  const hexValue = bn.toHexString().replace("0x", "");
   return `${"0".repeat(64 - hexValue.length)}${hexValue}`;
 };
 
 const addrToU256 = (addr: string) =>
-  `0x000000000000000000000000${addr.replaceAll("0x", "")}`;
+  `0x000000000000000000000000${addr.replace("0x", "")}`;
 
 const commonEventFields = {
   blockHash:

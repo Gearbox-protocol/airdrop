@@ -12,7 +12,8 @@
   },
   "license": "BUSL-1.1",
   "scripts": {
-    "build": "yarn clean && yarn compile",
+    "build": "tsc",
+    "build-contract": "yarn clean && yarn compile",
     "clean": "npx hardhat clean",
     "compile": "npx hardhat compile",
     "test-contract": "npx hardhat test",

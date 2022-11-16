@@ -17,7 +17,7 @@ import {
   AirdropDistributorInfo,
   ClaimableBalance,
   parseBalanceMap,
-} from "../core/parse-accounts";
+} from "../core/merkle/parse-accounts";
 import { deployDistributor } from "../scripts/deployer";
 import {
   AirdropDistributor,
