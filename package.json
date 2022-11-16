@@ -11,10 +11,16 @@
     "url": "https://github.com/Gearbox-protocol/airdrop"
   },
   "license": "BUSL-1.1",
+  "main": "dist/index.js",
+  "files": [
+    "dist"
+  ],
   "scripts": {
+
     "build": "tsc",
     "build-contract": "yarn clean && yarn compile",
     "clean": "npx hardhat clean",
+
     "compile": "npx hardhat compile",
     "test-contract": "npx hardhat test",
     "verify": "npx hardhat run node_modules/@gearbox-protocol/devops/lib/verifier/verify.js",
@@ -28,36 +34,47 @@
     "update": "npx hardhat run scripts/updateRewards.ts -- network mainnet",
     "update-goerli": "npx hardhat run scripts/updateRewards.ts -- network goerli"
   },
+  "dependencies": {},
   "devDependencies": {
-    "@commitlint/cli": "^17.1.2",
-    "@commitlint/config-conventional": "^17.1.0",
+    "@commitlint/cli": "^17.2.0",
+    "@commitlint/config-conventional": "^17.2.0",
+    "@gearbox-protocol/core-v2": "^1.0.8",
     "@gearbox-protocol/devops": "^1.1.3",
     "@gearbox-protocol/eslint-config": "^1.6.1",
     "@gearbox-protocol/prettier-config": "^1.5.0",
     "@gearbox-protocol/sdk": "^1.16.9",
     "@nomiclabs/hardhat-ethers": "^2.0.5",
-    "@types/mocha": "^10.0.0",
-    "ethereumjs-util": "^7.1.5",
-    "ethers": "^5.7.1",
-    "hardhat": "^2.11.2",
-    "hardhat-contract-sizer": "^2.6.1",
-    "husky": "^8.0.1",
-    "lint-staged": "^13.0.3",
-    "tslog": "^3.3.4",
-    "typechain": "^8.0.0",
-    "typescript": "^4.8.2",
-    "@gearbox-protocol/core-v2": "^1.0.8",
     "@nomiclabs/hardhat-etherscan": "^3.1.0",
     "@nomiclabs/hardhat-waffle": "^2.0.3",
     "@openzeppelin/contracts": "^4.7.3",
     "@typechain/ethers-v5": "^10.1.0",
     "@typechain/hardhat": "^6.1.3",
+    "@types/mocha": "^10.0.0",
     "dotenv": "^16.0.3",
+    "eslint": "^8.27.0",
     "ethereum-waffle": "^3.4.4",
+    "ethereumjs-util": "^7.1.5",
+    "ethers": "^5.7.1",
+    "hardhat": "^2.11.2",
     "hardhat-abi-exporter": "^2.10.0",
+    "hardhat-contract-sizer": "^2.6.1",
     "hardhat-gas-reporter": "^1.0.9",
+    "husky": "^8.0.2",
+    "lint-staged": "^13.0.3",
     "mocha": "^10.1.0",
-    "ts-node": "^10.9.1"
+    "prettier": "^2.7.1",
+    "prettier-plugin-solidity": "^1.0.0-rc.1",
+    "ts-node": "^10.9.1",
+    "tslog": "^3.3.4",
+    "typechain": "^8.0.0",
+    "typescript": "^4.8.2"
   },
-  "dependencies": {}
+  "prettier": "@gearbox-protocol/prettier-config",
+  "lint-staged": {
+    "*.ts": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{sol,json,md}": "prettier --write"
+  }
 }

@@ -10,7 +10,11 @@ types
 dist
 node_modules
 *.log
+.eslintcache
+.eslint.local.json
+dist/
 
 #Hardhat files
 cache
 artifacts
+
