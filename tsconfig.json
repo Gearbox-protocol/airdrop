@@ -4,15 +4,6 @@
     "module": "commonjs",
     "strict": true,
     "esModuleInterop": true,
-    "outDir": "dist",
     "declaration": true
-  },
-  "include": [
-    "scripts/**/*",
-    "core/**/*",
-    "campaigns/**/*",
-    "types/**/*",
-    "test/**/*"
-  ],
-  "files": ["./hardhat.config.ts"]
+  }
 }

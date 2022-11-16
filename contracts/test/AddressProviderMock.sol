@@ -4,7 +4,6 @@
 pragma solidity ^0.8.10;
 
 contract AddressProviderMock {
-
     address public getGearToken;
     address public getTreasuryContract;
 
