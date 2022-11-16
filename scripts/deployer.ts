@@ -1,6 +1,7 @@
 import { deploy, Verifier } from "@gearbox-protocol/devops";
 import { Overrides } from "ethers";
 import { Logger } from "tslog";
+
 import {
   AirdropDistributorInfo,
   ClaimableBalance,
@@ -13,7 +14,7 @@ export async function deployDistributor(
   distributed: ClaimableBalance[],
   claimed: ClaimableBalance[],
   log: Logger,
-  fee?: Overrides
+  fee?: Overrides,
 ): Promise<[AirdropDistributor, AirdropDistributorInfo]> {
   log.info("Generating tree");
   const distributorInfo = parseBalanceMap(distributed);
@@ -23,7 +24,7 @@ export async function deployDistributor(
   const constructorArguments = [
     apAddress,
     distributorInfo.merkleRoot,
-    claimed.map((c) => ({
+    claimed.map(c => ({
       account: c.address,
       amount: c.amount,
     })),
@@ -33,7 +34,7 @@ export async function deployDistributor(
     "AirdropDistributor",
     log,
     ...constructorArguments,
-    fee
+    fee,
   );
 
   verifier.addContract({

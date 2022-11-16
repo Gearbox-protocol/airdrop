@@ -5,9 +5,9 @@ import { BigNumber } from "ethers";
 import * as fs from "fs";
 import { ethers } from "hardhat";
 import { Logger } from "tslog";
+
 import { campaigns } from "../campaigns";
 import { ClaimableBalance } from "../core/merkle/parse-accounts";
-
 import { DistributionDataStruct } from "../types/contracts/AirdropDistributor";
 import { deployDistributor } from "./deployer";
 import { mapToClaimed } from "./lib";
@@ -22,7 +22,7 @@ const fee = {};
 
 function cutIntoChuncks<T>(
   array: Array<T>,
-  chunkSize: number
+  chunkSize: number,
 ): Array<Array<T>> {
   const result: Array<Array<T>> = [];
 
@@ -39,12 +39,12 @@ export function getInitialSetup(): InitialClaim {
   const events: Array<DistributionDataStruct> = [];
 
   for (const c of campaigns) {
-    c.distributed.forEach((data) => {
+    c.distributed.forEach(data => {
       const amount = BigNumber.from(10).pow(18).mul(data.amount);
       const account = data.address.toLowerCase();
 
       distributed[account] = (distributed[account] || BigNumber.from(0)).add(
-        amount
+        amount,
       );
       events.push({
         account,
@@ -53,19 +53,19 @@ export function getInitialSetup(): InitialClaim {
       });
     });
 
-    c.claimed.forEach((data) => {
+    c.claimed.forEach(data => {
       const amount = BigNumber.from(10).pow(18).mul(data.amount);
       const account = data.address.toLowerCase();
 
       claimed[account] = (claimed[account] || BigNumber.from(0)).add(amount);
       distributed[account] = (distributed[account] || BigNumber.from(0)).sub(
-        amount
+        amount,
       );
     });
   }
 
   const result: InitialClaim = {
-    distributed: mapToClaimed(distributed).filter((e) => !e.amount.isZero()),
+    distributed: mapToClaimed(distributed).filter(e => !e.amount.isZero()),
     claimed: mapToClaimed(claimed),
     events,
   };
@@ -85,7 +85,7 @@ async function deployDistributorLive() {
     chainId === 1337 ? await detectNetwork() : getNetworkType(chainId);
 
   dotenv.config({
-    path: networkType == "Goerli" ? ".env.goerli" : ".env.mainnet",
+    path: networkType === "Goerli" ? ".env.goerli" : ".env.mainnet",
   });
 
   const ADDRESS_PROVIDER = process.env.REACT_APP_ADDRESS_PROVIDER || "";
@@ -109,19 +109,19 @@ async function deployDistributorLive() {
     distributed,
     claimedChunks[0],
     log,
-    fee
+    fee,
   );
 
   for (let i = 1; i < claimedChunks.length; i++) {
     log.debug(`Adding claimed events ${i} of ${claimedChunks.length}`);
     const receipt = await waitForTransaction(
       airdropDistributor.updateHistoricClaims(
-        claimedChunks[i].map((c) => ({
+        claimedChunks[i].map(c => ({
           account: c.address,
           amount: c.amount,
         })),
-        fee
-      )
+        fee,
+      ),
     );
 
     log.debug(`Gas used: ${receipt.gasUsed}`);
@@ -137,7 +137,7 @@ async function deployDistributorLive() {
       continue;
     }
     const receipt = await waitForTransaction(
-      airdropDistributor.emitDistributionEvents(chunk, fee)
+      airdropDistributor.emitDistributionEvents(chunk, fee),
     );
     log.debug(`Gas used: ${receipt.gasUsed}`);
     i++;
@@ -148,4 +148,4 @@ async function deployDistributorLive() {
 
 deployDistributorLive()
   .then(() => console.log("Ok"))
-  .catch((e) => console.log(e));
+  .catch(e => console.log(e));

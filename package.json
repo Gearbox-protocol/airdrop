@@ -16,11 +16,9 @@
     "dist"
   ],
   "scripts": {
-
     "build": "tsc",
     "build-contract": "yarn clean && yarn compile",
     "clean": "npx hardhat clean",
-
     "compile": "npx hardhat compile",
     "test-contract": "npx hardhat test",
     "verify": "npx hardhat run node_modules/@gearbox-protocol/devops/lib/verifier/verify.js",

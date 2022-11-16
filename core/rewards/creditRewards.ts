@@ -1,17 +1,17 @@
 import {
-  ICreditManagerV2__factory,
   ICreditConfigurator__factory,
   ICreditFacade__factory,
+  ICreditManagerV2__factory,
 } from "@gearbox-protocol/sdk";
 import {
-  OpenCreditAccountEvent,
   CloseCreditAccountEvent,
   IncreaseBorrowedAmountEvent,
+  OpenCreditAccountEvent,
   TransferAccountEvent,
 } from "@gearbox-protocol/sdk/lib/types/@gearbox-protocol/core-v2/contracts/interfaces/ICreditFacade.sol/ICreditFacade";
 import { BigNumber, providers } from "ethers";
-import { TypedEvent } from "../../types/common";
 
+import { TypedEvent } from "../../types/common";
 import { creditRewardsPerBlock } from "./creditRewardParams";
 import { Reward } from "./poolRewards";
 import { RangedValue } from "./range";
@@ -21,16 +21,16 @@ export class CreditRewards {
     creditManager: string,
     address: string,
     provider: providers.Provider,
-    toBlock?: number
+    toBlock?: number,
   ): Promise<BigNumber> {
     const rewards = await CreditRewards.computeAllRewards(
       creditManager,
       provider,
-      toBlock
+      toBlock,
     );
 
     const rewardToAddress = rewards.filter(
-      (r) => r.address === address.toLowerCase()
+      r => r.address === address.toLowerCase(),
     );
 
     return rewardToAddress.length === 0
@@ -41,18 +41,18 @@ export class CreditRewards {
   static async computeAllRewards(
     creditManager: string,
     provider: providers.Provider,
-    toBlock?: number
+    toBlock?: number,
   ): Promise<Array<Reward>> {
     const toBlockQuery = toBlock || (await provider.getBlockNumber());
 
     const cm = ICreditManagerV2__factory.connect(creditManager, provider);
     const cc = ICreditConfigurator__factory.connect(
       await cm.creditConfigurator(),
-      provider
+      provider,
     );
 
     const creditFacadesEvents = await cc.queryFilter(
-      cc.filters.CreditFacadeUpgraded()
+      cc.filters.CreditFacadeUpgraded(),
     );
 
     const events: Array<TypedEvent> = [];
@@ -61,13 +61,13 @@ export class CreditRewards {
       const query = await CreditRewards.query(
         cfe.args.newCreditFacade,
         provider,
-        toBlockQuery
+        toBlockQuery,
       );
       events.push(...query);
     }
 
     const rewardPerBlock = CreditRewards.getRewardsRange(
-      creditManager.toLowerCase()
+      creditManager.toLowerCase(),
     );
 
     return CreditRewards.parseEvents(events, rewardPerBlock, toBlockQuery);
@@ -76,7 +76,7 @@ export class CreditRewards {
   static parseEvents(
     events: Array<TypedEvent>,
     rewardPerBlock: RangedValue,
-    toBlock: number
+    toBlock: number,
   ): Array<Reward> {
     const borrowedRange: Record<string, RangedValue> = {};
     const totalBorrowedRange = new RangedValue();
@@ -87,7 +87,7 @@ export class CreditRewards {
 
     const cfi = ICreditFacade__factory.createInterface();
 
-    events.forEach((e) => {
+    events.forEach(e => {
       const event = cfi.parseLog(e);
       switch (e.topics[0]) {
         case cfi.getEventTopic("OpenCreditAccount"): {
@@ -158,13 +158,13 @@ export class CreditRewards {
       }
     });
 
-    return Object.keys(borrowed).map((address) => ({
+    return Object.keys(borrowed).map(address => ({
       address: address.toLowerCase(),
       amount: CreditRewards.computeRewardInt(
         toBlock,
         borrowedRange[address],
         totalBorrowedRange,
-        rewardPerBlock
+        rewardPerBlock,
       ),
     }));
   }
@@ -173,7 +173,7 @@ export class CreditRewards {
     toBlock: number,
     balance: RangedValue,
     totalSupply: RangedValue,
-    rewardPerBlock: RangedValue
+    rewardPerBlock: RangedValue,
   ): BigNumber {
     const keys = Array.from(
       new Set([
@@ -181,7 +181,7 @@ export class CreditRewards {
         ...totalSupply.keys,
         ...rewardPerBlock.keys,
         toBlock,
-      ])
+      ]),
     ).sort((a, b) => (a > b ? 1 : -1));
 
     let total = BigNumber.from(0);
@@ -198,7 +198,7 @@ export class CreditRewards {
           balancesArr[i]
             .mul(nextBlock - curBlock)
             .mul(rewardsArr[i])
-            .div(totalSupplyArr[i])
+            .div(totalSupplyArr[i]),
         );
       }
     }
@@ -209,24 +209,24 @@ export class CreditRewards {
   protected static async query(
     creditFacade: string,
     provider: providers.Provider,
-    toBlock: number
+    toBlock: number,
   ): Promise<Array<TypedEvent>> {
     const cf = ICreditFacade__factory.connect(creditFacade, provider);
     const topics = {
       OpenCreditAccount: cf.interface.getEventTopic("OpenCreditAccount"),
       CloseCreditAccount: cf.interface.getEventTopic("CloseCreditAccount"),
       LiquidateCreditAccount: cf.interface.getEventTopic(
-        "LiquidateCreditAccount"
+        "LiquidateCreditAccount",
       ),
       LiquidateExpiredCreditAccount: cf.interface.getEventTopic(
-        "LiquidateExpiredCreditAccount"
+        "LiquidateExpiredCreditAccount",
       ),
       TransferAccount: cf.interface.getEventTopic("TransferAccount"),
       IncreaseBorrowedAmount: cf.interface.getEventTopic(
-        "IncreaseBorrowedAmount"
+        "IncreaseBorrowedAmount",
       ),
       DecreaseBorrowedAmount: cf.interface.getEventTopic(
-        "DecreaseBorrowedAmount"
+        "DecreaseBorrowedAmount",
       ),
     };
 
@@ -236,7 +236,7 @@ export class CreditRewards {
         topics: [Object.values(topics)],
       },
       undefined,
-      toBlock
+      toBlock,
     );
 
     return logs;

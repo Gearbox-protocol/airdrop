@@ -1,4 +1,5 @@
 import { AirdropСampaigns } from "@gearbox-protocol/sdk";
+
 import { Campaign } from ".";
 
 export const earlyLiquidityProviders: Campaign = {

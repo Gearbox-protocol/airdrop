@@ -1,13 +1,13 @@
 import {
-  NetworkType,
   ADDRESS_0X0,
-  IERC20__factory,
-  tokenSymbolByAddress,
   DieselTokenTypes,
+  IERC20__factory,
+  NetworkType,
+  tokenSymbolByAddress,
 } from "@gearbox-protocol/sdk";
 import { BigNumber, providers } from "ethers";
-import { TransferEvent } from "../../types/contracts/test/ERC20Mock";
 
+import { TransferEvent } from "../../types/contracts/test/ERC20Mock";
 import { poolRewardsPerBlock } from "./poolRewardParams";
 import { RangedValue } from "./range";
 
@@ -22,7 +22,7 @@ export class PoolRewards {
     address: string,
     provider: providers.Provider,
     networkType: NetworkType,
-    toBlock?: number
+    toBlock?: number,
   ): Promise<BigNumber> {
     const toBlockQuery = toBlock || (await provider.getBlockNumber());
 
@@ -32,14 +32,14 @@ export class PoolRewards {
     const totalSupplyRange = new RangedValue();
     const rewardPerBlock = PoolRewards.getRewardsRange(
       dieselToken,
-      networkType
+      networkType,
     );
     const addrLC = address.toLowerCase();
 
     let totalSupply = BigNumber.from(0);
     let balance = BigNumber.from(0);
 
-    query.forEach((e) => {
+    query.forEach(e => {
       const from = e.args.from.toLowerCase();
       if (from === ADDRESS_0X0) {
         totalSupply = totalSupply.add(e.args.value);
@@ -63,7 +63,7 @@ export class PoolRewards {
       toBlockQuery,
       balanceRange,
       totalSupplyRange,
-      rewardPerBlock
+      rewardPerBlock,
     );
   }
 
@@ -71,7 +71,7 @@ export class PoolRewards {
     dieselToken: string,
     provider: providers.Provider,
     networkType: NetworkType,
-    toBlock?: number
+    toBlock?: number,
   ): Promise<Array<Reward>> {
     const toBlockQuery = toBlock || (await provider.getBlockNumber());
     const query = await PoolRewards.query(dieselToken, provider, toBlockQuery);
@@ -79,7 +79,7 @@ export class PoolRewards {
     const totalSupplyRange = new RangedValue();
     const rewardPerBlock = PoolRewards.getRewardsRange(
       dieselToken,
-      networkType
+      networkType,
     );
     const balancesRange: Record<string, RangedValue> = {};
 
@@ -87,8 +87,8 @@ export class PoolRewards {
     let balances: Record<string, BigNumber> = {};
 
     query
-      .filter((e) => !e.args.value.isZero())
-      .forEach((e) => {
+      .filter(e => !e.args.value.isZero())
+      .forEach(e => {
         const from = e.args.from.toLowerCase();
         if (from === ADDRESS_0X0) {
           totalSupply = totalSupply.add(e.args.value);
@@ -112,13 +112,13 @@ export class PoolRewards {
         }
       });
 
-    return Object.keys(balances).map((address) => ({
+    return Object.keys(balances).map(address => ({
       address,
       amount: PoolRewards.computeRewardInt(
         toBlockQuery,
         balancesRange[address],
         totalSupplyRange,
-        rewardPerBlock
+        rewardPerBlock,
       ),
     }));
   }
@@ -127,7 +127,7 @@ export class PoolRewards {
     toBlock: number,
     balance: RangedValue,
     totalSupply: RangedValue,
-    rewardPerBlock: RangedValue
+    rewardPerBlock: RangedValue,
   ): BigNumber {
     const keys = Array.from(
       new Set([
@@ -135,7 +135,7 @@ export class PoolRewards {
         ...totalSupply.keys,
         ...rewardPerBlock.keys,
         toBlock,
-      ])
+      ]),
     ).sort((a, b) => (a > b ? 1 : -1));
 
     let total = BigNumber.from(0);
@@ -152,7 +152,7 @@ export class PoolRewards {
           balancesArr[i]
             .mul(nextBlock - curBlock)
             .mul(rewardsArr[i])
-            .div(totalSupplyArr[i])
+            .div(totalSupplyArr[i]),
         );
       }
     }
@@ -163,7 +163,7 @@ export class PoolRewards {
   protected static async query(
     dieselToken: string,
     provider: providers.Provider,
-    toBlock: number
+    toBlock: number,
   ): Promise<Array<TransferEvent>> {
     const token = IERC20__factory.connect(dieselToken, provider);
     return await token.queryFilter(token.filters.Transfer(), 0, toBlock);
@@ -171,7 +171,7 @@ export class PoolRewards {
 
   protected static getRewardsRange(
     dieselToken: string,
-    networkType: NetworkType
+    networkType: NetworkType,
   ): RangedValue {
     const rewardPerBlock =
       poolRewardsPerBlock[networkType][

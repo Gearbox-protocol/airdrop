@@ -1,15 +1,15 @@
 import {
-  ICreditFacade__factory,
+  CREDIT_MANAGER_DAI_V2_MAINNET,
   DUMB_ADDRESS,
   DUMB_ADDRESS2,
-  CREDIT_MANAGER_DAI_V2_MAINNET,
+  ICreditFacade__factory,
 } from "@gearbox-protocol/sdk";
 import {
-  OpenCreditAccountEvent,
   CloseCreditAccountEvent,
-  LiquidateCreditAccountEvent,
-  IncreaseBorrowedAmountEvent,
   DecreaseBorrowedAmountEvent,
+  IncreaseBorrowedAmountEvent,
+  LiquidateCreditAccountEvent,
+  OpenCreditAccountEvent,
   TransferAccountEvent,
 } from "@gearbox-protocol/sdk/lib/types/@gearbox-protocol/core-v2/contracts/interfaces/ICreditFacade.sol/ICreditFacade";
 import { expect } from "chai";
@@ -39,7 +39,7 @@ export const openCreditAccountEvent = (
   address: string,
   blockNumber: number,
   onBehalf: string,
-  borrowAmount: BigNumber
+  borrowAmount: BigNumber,
 ) => {
   const data = `0x${bnToU256(borrowAmount)}${bnToU256(BigNumber.from(0))}`;
 
@@ -59,7 +59,7 @@ export const openCreditAccountEvent = (
 export const closeCreditAccountEvent = (
   address: string,
   blockNumber: number,
-  borrower: string
+  borrower: string,
 ) => {
   return {
     blockNumber,
@@ -78,7 +78,7 @@ export const liquidateCreditAccountEvent = (
   address: string,
   blockNumber: number,
   borrower: string,
-  expired = false
+  expired = false,
 ) => {
   return {
     blockNumber,
@@ -100,7 +100,7 @@ export const increaseBorrowedAmountEvent = (
   address: string,
   blockNumber: number,
   borrower: string,
-  amount: BigNumber
+  amount: BigNumber,
 ) => {
   return {
     blockNumber,
@@ -115,7 +115,7 @@ export const decreaseBorrowedAmountEvent = (
   address: string,
   blockNumber: number,
   borrower: string,
-  amount: BigNumber
+  amount: BigNumber,
 ) => {
   return {
     blockNumber,
@@ -130,7 +130,7 @@ export const transferAccountEvent = (
   address: string,
   blockNumber: number,
   oldOwner: string,
-  newOwner: string
+  newOwner: string,
 ) => {
   return {
     blockNumber,
@@ -151,7 +151,7 @@ describe("CreditRewards helper test", () => {
       CREDIT_MANAGER_DAI_V2_MAINNET,
       15902535,
       DUMB_ADDRESS,
-      BigNumber.from(1500)
+      BigNumber.from(1500),
     );
     let openEvent = cfi.parseLog(e) as unknown as OpenCreditAccountEvent;
 
@@ -161,7 +161,7 @@ describe("CreditRewards helper test", () => {
     e = closeCreditAccountEvent(
       CREDIT_MANAGER_DAI_V2_MAINNET,
       15902535,
-      DUMB_ADDRESS
+      DUMB_ADDRESS,
     );
     const closeEvent = cfi.parseLog(e) as unknown as CloseCreditAccountEvent;
     expect(closeEvent.args.borrower).to.be.eq(DUMB_ADDRESS);
@@ -171,11 +171,11 @@ describe("CreditRewards helper test", () => {
         CREDIT_MANAGER_DAI_V2_MAINNET,
         15902535,
         DUMB_ADDRESS,
-        expired
+        expired,
       );
 
       const liquidateEvent = cfi.parseLog(
-        e
+        e,
       ) as unknown as LiquidateCreditAccountEvent;
       expect(liquidateEvent.args.borrower).to.be.eq(DUMB_ADDRESS);
     }
@@ -184,10 +184,10 @@ describe("CreditRewards helper test", () => {
       CREDIT_MANAGER_DAI_V2_MAINNET,
       15902535,
       DUMB_ADDRESS,
-      BigNumber.from(1898)
+      BigNumber.from(1898),
     );
     const increaseEvent = cfi.parseLog(
-      e
+      e,
     ) as unknown as IncreaseBorrowedAmountEvent;
     expect(increaseEvent.args.borrower).to.be.eq(DUMB_ADDRESS);
     expect(increaseEvent.args.amount.toNumber()).to.be.eq(1898);
@@ -196,10 +196,10 @@ describe("CreditRewards helper test", () => {
       CREDIT_MANAGER_DAI_V2_MAINNET,
       15902535,
       DUMB_ADDRESS,
-      BigNumber.from(1898)
+      BigNumber.from(1898),
     );
     const decreaseEvent = cfi.parseLog(
-      e
+      e,
     ) as unknown as DecreaseBorrowedAmountEvent;
     expect(decreaseEvent.args.borrower).to.be.eq(DUMB_ADDRESS);
     expect(decreaseEvent.args.amount.toNumber()).to.be.eq(1898);
@@ -208,7 +208,7 @@ describe("CreditRewards helper test", () => {
       CREDIT_MANAGER_DAI_V2_MAINNET,
       15902535,
       DUMB_ADDRESS,
-      DUMB_ADDRESS2
+      DUMB_ADDRESS2,
     );
     const transferEvent = cfi.parseLog(e) as unknown as TransferAccountEvent;
     expect(transferEvent.args.oldOwner).to.be.eq(DUMB_ADDRESS);

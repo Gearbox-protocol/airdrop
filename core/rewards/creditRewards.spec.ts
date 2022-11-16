@@ -5,8 +5,8 @@ import {
 } from "@gearbox-protocol/sdk";
 import { expect } from "chai";
 import { BigNumber } from "ethers";
-import { TypedEvent } from "../../types/common";
 
+import { TypedEvent } from "../../types/common";
 import { CreditRewards } from "./creditRewards";
 import {
   closeCreditAccountEvent,

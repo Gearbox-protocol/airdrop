@@ -1,5 +1,3 @@
-import { BigNumber } from "ethers";
-
 import {
   CREDIT_MANAGER_DAI_V2_GOERLI,
   CREDIT_MANAGER_DAI_V2_MAINNET,
@@ -14,6 +12,8 @@ import {
   CreditManagersV2,
   DieselTokenTypes,
 } from "@gearbox-protocol/sdk";
+import { BigNumber } from "ethers";
+
 import { RangedValue } from "./range";
 
 export const creditRewardsPerBlock: Record<CreditManagersV2, RangedValue> = {
@@ -43,44 +43,44 @@ const GOERLI_BLOCK = 7694030;
 
 creditRewardsPerBlock[CREDIT_MANAGER_DAI_V2_GOERLI].addValue(
   GOERLI_BLOCK,
-  BigNumber.from(10).pow(18).mul(GEAR_PER_BLOCK.dDAI).div(100)
+  BigNumber.from(10).pow(18).mul(GEAR_PER_BLOCK.dDAI).div(100),
 );
 creditRewardsPerBlock[CREDIT_MANAGER_USDC_V2_GOERLI].addValue(
   GOERLI_BLOCK,
-  BigNumber.from(10).pow(18).mul(GEAR_PER_BLOCK.dUSDC).div(100)
+  BigNumber.from(10).pow(18).mul(GEAR_PER_BLOCK.dUSDC).div(100),
 );
 creditRewardsPerBlock[CREDIT_MANAGER_WETH_V2_GOERLI].addValue(
   GOERLI_BLOCK,
-  BigNumber.from(10).pow(18).mul(GEAR_PER_BLOCK.dWETH).div(100)
+  BigNumber.from(10).pow(18).mul(GEAR_PER_BLOCK.dWETH).div(100),
 );
 creditRewardsPerBlock[CREDIT_MANAGER_WSTETH_V2_GOERLI].addValue(
   GOERLI_BLOCK,
-  BigNumber.from(10).pow(18).mul(GEAR_PER_BLOCK.dwstETH).div(100)
+  BigNumber.from(10).pow(18).mul(GEAR_PER_BLOCK.dwstETH).div(100),
 );
 creditRewardsPerBlock[CREDIT_MANAGER_WBTC_V2_GOERLI].addValue(
   GOERLI_BLOCK,
-  BigNumber.from(10).pow(18).mul(GEAR_PER_BLOCK.dWBTC).div(100)
+  BigNumber.from(10).pow(18).mul(GEAR_PER_BLOCK.dWBTC).div(100),
 );
 
 const MAINNET_BLOCK = 15724000;
 
 creditRewardsPerBlock[CREDIT_MANAGER_DAI_V2_MAINNET].addValue(
   MAINNET_BLOCK,
-  BigNumber.from(10).pow(18).mul(GEAR_PER_BLOCK.dDAI).div(100)
+  BigNumber.from(10).pow(18).mul(GEAR_PER_BLOCK.dDAI).div(100),
 );
 creditRewardsPerBlock[CREDIT_MANAGER_USDC_V2_MAINNET].addValue(
   MAINNET_BLOCK,
-  BigNumber.from(10).pow(18).mul(GEAR_PER_BLOCK.dUSDC).div(100)
+  BigNumber.from(10).pow(18).mul(GEAR_PER_BLOCK.dUSDC).div(100),
 );
 creditRewardsPerBlock[CREDIT_MANAGER_WETH_V2_MAINNET].addValue(
   MAINNET_BLOCK,
-  BigNumber.from(10).pow(18).mul(GEAR_PER_BLOCK.dWETH).div(100)
+  BigNumber.from(10).pow(18).mul(GEAR_PER_BLOCK.dWETH).div(100),
 );
 creditRewardsPerBlock[CREDIT_MANAGER_WSTETH_V2_MAINNET].addValue(
   MAINNET_BLOCK,
-  BigNumber.from(10).pow(18).mul(GEAR_PER_BLOCK.dwstETH).div(100)
+  BigNumber.from(10).pow(18).mul(GEAR_PER_BLOCK.dwstETH).div(100),
 );
 creditRewardsPerBlock[CREDIT_MANAGER_WBTC_V2_MAINNET].addValue(
   MAINNET_BLOCK,
-  BigNumber.from(10).pow(18).mul(GEAR_PER_BLOCK.dWBTC).div(100)
+  BigNumber.from(10).pow(18).mul(GEAR_PER_BLOCK.dWBTC).div(100),
 );
