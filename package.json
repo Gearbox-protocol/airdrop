@@ -1,5 +1,5 @@
 {
-  "name": "gearbox-contracts",
+  "name": "@gearbox-protocol/airdrop",
   "description": "Airdrop center for Gearbox protocol",
   "version": "1.0.0",
   "homepage": "https://gearbox.fi",
