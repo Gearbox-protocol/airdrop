@@ -16,6 +16,7 @@
     "dist"
   ],
   "scripts": {
+    "dev": "tsc -w -p ./tsconfig.build.json",
     "build": "tsc -p ./tsconfig.build.json",
     "build-contract": "yarn clean && yarn compile",
     "clean": "npx hardhat clean",
