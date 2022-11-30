@@ -1,9 +1,8 @@
-import { AirdropСampaigns } from "@gearbox-protocol/sdk";
-
+import { RewardСampaigns } from "../core/rewards/airdrops";
 import { Campaign } from ".";
 
 export const earlyLiquidityProviders: Campaign = {
-  campaign: AirdropСampaigns.EARLY_LIQUIDITY_PROVIDER,
+  campaign: RewardСampaigns.EARLY_LIQUIDITY_PROVIDER,
   distributed: [
     { address: "0x0011ba85bb0191580248595607719b19b12952bb", amount: 662 },
     { address: "0x004302ff315df99e7a200d3f21bf5b85f747dae9", amount: 227 },

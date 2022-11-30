@@ -664,10 +664,10 @@
   resolved "https://registry.yarnpkg.com/@gearbox-protocol/prettier-config/-/prettier-config-1.5.0.tgz#4df8e9fd2305fee6ab8c1417a02e31343836932a"
   integrity sha512-FUoprSsBdZyBjgxXCKL6mTkbeUJytaLzPJqIOoQpDmBRTX0seCc2o5I9PI9tySoRIlNnd/XXnKCXq1xHDEGbxw==
 
-"@gearbox-protocol/sdk@^1.16.11":
-  version "1.16.11"
-  resolved "https://registry.yarnpkg.com/@gearbox-protocol/sdk/-/sdk-1.16.11.tgz#e15fbf3fa4aa2891818d432ea5d842fec6e3c487"
-  integrity sha512-bTNbiRBOW8jzs20YVpWWd5ZxlDd+XCvmhTzJntbudnzsXhanrcMR90qR8/Rrne1JT1tsml3jfJeo5HOJQuCv8Q==
+"@gearbox-protocol/sdk@^1.17.3":
+  version "1.17.3"
+  resolved "https://registry.yarnpkg.com/@gearbox-protocol/sdk/-/sdk-1.17.3.tgz#9292696d9ed063522fdb99954216d13aa9341414"
+  integrity sha512-Y0w/lcMm5ysa0+7ScxJZ9OuoBFVCbBJxdDf5hoxyDpDfrPUw0w00RR/g6mq0qrTfNX364BXsi9jVtJPqn9Tq3A==
   dependencies:
     "@types/deep-eql" "^4.0.0"
     decimal.js-light "^2.5.1"

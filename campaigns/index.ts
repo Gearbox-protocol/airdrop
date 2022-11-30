@@ -1,5 +1,4 @@
-import { AirdropСampaigns } from "@gearbox-protocol/sdk";
-
+import { RewardСampaigns } from "../core/rewards/airdrops";
 import { creditAccountMiners } from "./01-ca-miners";
 import { earlyCommunityMembers } from "./02-early-community-members";
 import { earlyLiquidityProviders } from "./03-early-liquidity-providers";
@@ -11,7 +10,7 @@ export interface AirdropBalance {
 }
 
 export interface Campaign {
-  campaign: AirdropСampaigns;
+  campaign: RewardСampaigns;
   distributed: Array<AirdropBalance>;
   claimed: Array<AirdropBalance>;
 }

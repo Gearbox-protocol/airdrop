@@ -1,4 +1,4 @@
-export enum AirdropСampaigns {
+export enum RewardСampaigns {
   CREDIT_ACCOUNT_MINER,
   EARLY_COMMUNITY_MEMBER,
   EARLY_LIQUIDITY_PROVIDER,

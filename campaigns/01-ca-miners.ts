@@ -1,5 +1,4 @@
-import { AirdropСampaigns } from "@gearbox-protocol/sdk";
-
+import { RewardСampaigns } from "../core/rewards/airdrops";
 import { Campaign } from ".";
 
 const miners = [
@@ -5004,7 +5003,7 @@ const miners = [
 ];
 
 export const creditAccountMiners: Campaign = {
-  campaign: AirdropСampaigns.CREDIT_ACCOUNT_MINER,
+  campaign: RewardСampaigns.CREDIT_ACCOUNT_MINER,
   distributed: miners,
   claimed: miners,
 };

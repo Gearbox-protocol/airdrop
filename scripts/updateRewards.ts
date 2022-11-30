@@ -9,12 +9,12 @@ import {
   CREDIT_MANAGER_WETH_V2_MAINNET,
   CREDIT_MANAGER_WSTETH_V2_GOERLI,
   CREDIT_MANAGER_WSTETH_V2_MAINNET,
-  CreditRewards,
+  deployedContracts,
   detectNetwork,
   formatBN,
-  PoolRewards,
   SupportedToken,
   tokenDataByNetwork,
+  WAD,
 } from "@gearbox-protocol/sdk";
 import * as dotenv from "dotenv";
 import { BigNumber } from "ethers";
@@ -22,7 +22,10 @@ import * as fs from "fs";
 import { ethers } from "hardhat";
 
 import { campaigns } from "../campaigns";
+import { CreditRewards, PoolRewards } from "../core";
+import { CSVExport } from "../core/csv/csvExport";
 import { parseBalanceMap } from "../core/merkle/parse-accounts";
+import { RewardСampaigns } from "../core/rewards/airdrops";
 import {
   IAddressProvider__factory,
   IAirdropDistributor__factory,
@@ -54,7 +57,7 @@ export async function updatePoolRewards() {
   }
 
   console.log(`Address provider: ${ADDRESS_PROVIDER}`);
-  console.log(`Airdrop distributor: ${AIRDROP_DISTRIBUTOR}`);
+  console.log(`Reward distributor: ${AIRDROP_DISTRIBUTOR}`);
 
   const gearToken = IERC20__factory.connect(
     await IAddressProvider__factory.connect(
@@ -73,6 +76,8 @@ export async function updatePoolRewards() {
 
   console.log(`To block: ${toBlock}`);
 
+  const exportCsv = new CSVExport();
+
   for (const c of campaigns) {
     c.distributed.forEach(data => {
       const amount = BigNumber.from(10).pow(18).mul(data.amount);
@@ -81,6 +86,8 @@ export async function updatePoolRewards() {
       distributed[account] = (distributed[account] || BigNumber.from(0)).add(
         amount,
       );
+
+      exportCsv.additem(account, RewardСampaigns[c.campaign], data.amount);
     });
   }
 
@@ -93,6 +100,7 @@ export async function updatePoolRewards() {
   ];
 
   for (const dToken of dieselTokens) {
+    console.log(`Computing pool rewards for ${dToken}`);
     try {
       const poolRewards = await PoolRewards.computeAllRewards(
         tokenDataByNetwork[network][dToken],
@@ -104,9 +112,15 @@ export async function updatePoolRewards() {
         distributed[reward.address] = (
           distributed[reward.address] || BigNumber.from(0)
         ).add(reward.amount);
+
+        exportCsv.additem(
+          reward.address,
+          `Pool ${dToken}`,
+          reward.amount.div(WAD).toNumber(),
+        );
       });
     } catch (e) {
-      console.log("fff", e);
+      console.error("Error:\n", e);
     }
   }
 
@@ -128,14 +142,24 @@ export async function updatePoolRewards() {
         ];
 
   for (const cm of cms) {
+    console.log(
+      `Computing credit manager rewards for ${deployedContracts[cm]}`,
+    );
     const creditRewards = await CreditRewards.computeAllRewards(
       cm,
       deployer.provider!,
     );
+
     creditRewards.forEach(reward => {
       distributed[reward.address] = (
         distributed[reward.address] || BigNumber.from(0)
       ).add(reward.amount);
+
+      exportCsv.additem(
+        reward.address,
+        `CM ${deployedContracts[cm]}`,
+        reward.amount.div(WAD).toNumber(),
+      );
     });
   }
 
@@ -151,6 +175,10 @@ export async function updatePoolRewards() {
     lastBlock,
   );
 
+  claimed.forEach(e =>
+    exportCsv.addClaimed(e.args.account, e.args.amount.div(WAD).toNumber()),
+  );
+
   const totalClaimed = claimed.reduce(
     (a, b) => a.add(b.args.amount),
     BigNumber.from(0),
@@ -164,18 +192,23 @@ export async function updatePoolRewards() {
   const diff = totalNeeded.sub(totalClaimed).sub(balance);
 
   console.log(
-    `Airdrop contract should be fulfilled with ${formatBN(
+    `Rewards contract should be fulfilled with ${formatBN(
       diff,
       18,
     )} ${diff.toString()}`,
   );
 
+  distributorInfo.toBlock = toBlock;
+
+  const fname = `${network.toLowerCase()}_${distributorInfo.merkleRoot.replace(
+    "0x",
+    "",
+  )}`;
+  fs.writeFileSync(`./merkle/${fname}.json`, JSON.stringify(distributorInfo));
+
   fs.writeFileSync(
-    `./merkle/${network.toLowerCase()}_${distributorInfo.merkleRoot.replace(
-      "0x",
-      "",
-    )}.json`,
-    JSON.stringify(distributorInfo),
+    `./merkle/${fname}.csv`,
+    `REWARDS COMPUTED TO BLOCK: ${toBlock}\n${exportCsv.getCSV()}`,
   );
 
   console.log(`Last merkle: ${distributorInfo.merkleRoot}`);

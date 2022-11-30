@@ -1,9 +1,8 @@
-import { AirdropСampaigns } from "@gearbox-protocol/sdk";
-
+import { RewardСampaigns } from "../core/rewards/airdrops";
 import { Campaign } from ".";
 
 export const earlyCommunityMembers: Campaign = {
-  campaign: AirdropСampaigns.EARLY_COMMUNITY_MEMBER,
+  campaign: RewardСampaigns.EARLY_COMMUNITY_MEMBER,
   distributed: [
     { address: "0x00000000005ef87f8ca7014309ece7260bbcdaeb", amount: 20000 },
     { address: "0x0000000484f2217f1a64eb6d24b5cee446faeae5", amount: 30000 },
