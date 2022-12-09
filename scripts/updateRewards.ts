@@ -89,6 +89,14 @@ export async function updatePoolRewards() {
 
       exportCsv.additem(account, RewardСampaigns[c.campaign], data.amount);
     });
+    c.claimed.forEach(data => {
+      const amount = BigNumber.from(10).pow(18).mul(data.amount);
+      const account = data.address.toLowerCase();
+
+      distributed[account] = (distributed[account] || BigNumber.from(0)).sub(
+        amount,
+      );
+    });
   }
 
   const dieselTokens: Array<SupportedToken> = [
@@ -148,6 +156,7 @@ export async function updatePoolRewards() {
     const creditRewards = await CreditRewards.computeAllRewards(
       cm,
       deployer.provider!,
+      toBlock,
     );
 
     creditRewards.forEach(reward => {
