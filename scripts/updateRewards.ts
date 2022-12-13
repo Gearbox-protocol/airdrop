@@ -11,9 +11,6 @@ import {
   CREDIT_MANAGER_WSTETH_V2_MAINNET,
   deployedContracts,
   detectNetwork,
-  formatBN,
-  SupportedToken,
-  tokenDataByNetwork,
   WAD,
 } from "@gearbox-protocol/sdk";
 import * as dotenv from "dotenv";
@@ -21,11 +18,14 @@ import { BigNumber } from "ethers";
 import * as fs from "fs";
 import { ethers } from "hardhat";
 
-import { campaigns } from "../campaigns";
-import { CreditRewards, PoolRewards } from "../core";
+import { CreditRewards } from "../core";
+import { computeCampaigns } from "../core/compute/campaign";
+import { computeCreditManagers } from "../core/compute/creditManager";
+import { computePools } from "../core/compute/pool";
 import { CSVExport } from "../core/csv/csvExport";
 import { parseBalanceMap } from "../core/merkle/parse-accounts";
-import { RewardСampaigns } from "../core/rewards/airdrops";
+import { formatGear } from "../core/utils/formatter";
+import { loadPrevMerkle } from "../core/utils/prevMerkle";
 import {
   IAddressProvider__factory,
   IAirdropDistributor__factory,
@@ -56,8 +56,12 @@ export async function updatePoolRewards() {
     throw new Error("AIRDROP_DISTRIBUTOR token address unknown");
   }
 
-  console.log(`Address provider: ${ADDRESS_PROVIDER}`);
-  console.log(`Reward distributor: ${AIRDROP_DISTRIBUTOR}`);
+  console.log(
+    `Address provider: https://etherscan.io/address/${ADDRESS_PROVIDER}`,
+  );
+  console.log(
+    `Reward distributor: https://etherscan.io/address/${AIRDROP_DISTRIBUTOR}\n`,
+  );
 
   const gearToken = IERC20__factory.connect(
     await IAddressProvider__factory.connect(
@@ -74,103 +78,41 @@ export async function updatePoolRewards() {
 
   const toBlock = await deployer.provider!.getBlockNumber();
 
-  console.log(`To block: ${toBlock}`);
+  const prevMerkle = await loadPrevMerkle(network, distributor);
+
+  console.log(
+    `Rewards to block: ${toBlock} [contract merkle root at block #${
+      prevMerkle.toBlock
+    }, ${toBlock - prevMerkle.toBlock} blocks ago]\n`,
+  );
 
   const exportCsv = new CSVExport();
 
-  for (const c of campaigns) {
-    c.distributed.forEach(data => {
-      const amount = BigNumber.from(10).pow(18).mul(data.amount);
-      const account = data.address.toLowerCase();
+  computeCampaigns(exportCsv, distributed);
 
-      distributed[account] = (distributed[account] || BigNumber.from(0)).add(
-        amount,
-      );
+  console.log("");
 
-      exportCsv.additem(account, RewardСampaigns[c.campaign], data.amount);
-    });
-    c.claimed.forEach(data => {
-      const amount = BigNumber.from(10).pow(18).mul(data.amount);
-      const account = data.address.toLowerCase();
+  await computePools(
+    exportCsv,
+    distributed,
+    network,
+    toBlock,
+    prevMerkle.toBlock,
+    deployer,
+  );
 
-      distributed[account] = (distributed[account] || BigNumber.from(0)).sub(
-        amount,
-      );
-    });
-  }
+  console.log("");
 
-  const dieselTokens: Array<SupportedToken> = [
-    "dDAI",
-    "dUSDC",
-    "dWETH",
-    "dWBTC",
-    "dwstETH",
-  ];
+  await computeCreditManagers(
+    exportCsv,
+    distributed,
+    network,
+    toBlock,
+    prevMerkle.toBlock,
+    deployer,
+  );
 
-  for (const dToken of dieselTokens) {
-    console.log(`Computing pool rewards for ${dToken}`);
-    try {
-      const poolRewards = await PoolRewards.computeAllRewards(
-        tokenDataByNetwork[network][dToken],
-        deployer.provider!,
-        network,
-        toBlock,
-      );
-      poolRewards.forEach(reward => {
-        distributed[reward.address] = (
-          distributed[reward.address] || BigNumber.from(0)
-        ).add(reward.amount);
-
-        exportCsv.additem(
-          reward.address,
-          `Pool ${dToken}`,
-          reward.amount.div(WAD).toNumber(),
-        );
-      });
-    } catch (e) {
-      console.error("Error:\n", e);
-    }
-  }
-
-  const cms =
-    network === "Mainnet"
-      ? [
-          CREDIT_MANAGER_DAI_V2_MAINNET,
-          CREDIT_MANAGER_USDC_V2_MAINNET,
-          CREDIT_MANAGER_WETH_V2_MAINNET,
-          CREDIT_MANAGER_WSTETH_V2_MAINNET,
-          CREDIT_MANAGER_WBTC_V2_MAINNET,
-        ]
-      : [
-          CREDIT_MANAGER_DAI_V2_GOERLI,
-          CREDIT_MANAGER_USDC_V2_GOERLI,
-          CREDIT_MANAGER_WETH_V2_GOERLI,
-          CREDIT_MANAGER_WSTETH_V2_GOERLI,
-          CREDIT_MANAGER_WBTC_V2_GOERLI,
-        ];
-
-  for (const cm of cms) {
-    console.log(
-      `Computing credit manager rewards for ${deployedContracts[cm]}`,
-    );
-    const creditRewards = await CreditRewards.computeAllRewards(
-      cm,
-      deployer.provider!,
-      toBlock,
-    );
-
-    creditRewards.forEach(reward => {
-      distributed[reward.address] = (
-        distributed[reward.address] || BigNumber.from(0)
-      ).add(reward.amount);
-
-      exportCsv.additem(
-        reward.address,
-        `CM ${deployedContracts[cm]}`,
-        reward.amount.div(WAD).toNumber(),
-      );
-    });
-  }
+  console.log("");
 
   const lastBlock = await deployer.provider!.getBlockNumber();
 
@@ -179,7 +121,7 @@ export async function updatePoolRewards() {
   });
 
   const claimed = await distributor.queryFilter(
-    distributor.filters.Claimed(),
+    distributor.filters.Claimed(null, null, false),
     0,
     lastBlock,
   );
@@ -201,11 +143,17 @@ export async function updatePoolRewards() {
   const diff = totalNeeded.sub(totalClaimed).sub(balance);
 
   console.log(
-    `Rewards contract should be fulfilled with ${formatBN(
-      diff,
-      18,
-    )} ${diff.toString()}`,
+    `Total distributed: ${formatGear(
+      totalNeeded,
+    )}, diff with existing merkle ${formatGear(
+      totalNeeded.sub(prevMerkle.tokenTotal),
+    )}`,
   );
+  console.log(`Total claimed: ${formatGear(totalClaimed)}`);
+  console.log(`Need to add: ${formatGear(diff)}`);
+  console.log("\n");
+
+  console.log(`Rewards contract should be fulfilled with ${formatGear(diff)}`);
 
   distributorInfo.toBlock = toBlock;
 

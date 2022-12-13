@@ -14,9 +14,9 @@ import { Suite } from "mocha";
 import { Logger } from "tslog";
 
 import {
-  AirdropDistributorInfo,
   ClaimableBalance,
   parseBalanceMap,
+  RewardsDistributorInfo,
 } from "../core/merkle/parse-accounts";
 import { deployDistributor } from "../scripts/deployer";
 import {
@@ -37,7 +37,7 @@ describe("Airdrop distributor tests", function (this: Suite) {
   let user: SignerWithAddress;
 
   let airdropDistributor: AirdropDistributor;
-  let info: AirdropDistributorInfo;
+  let info: RewardsDistributorInfo;
   let token: ERC20Mock;
   let log: Logger;
 

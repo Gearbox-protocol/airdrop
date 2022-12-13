@@ -7,7 +7,7 @@ const { isAddress, getAddress } = utils;
 // It is completely sufficient for recreating the entire merkle tree.
 // Anyone can verify that all air drops are included in the tree,
 // and the tree has no additional distributions.
-export interface AirdropDistributorInfo {
+export interface RewardsDistributorInfo {
   merkleRoot: string;
   tokenTotal: string;
   toBlock: number;
@@ -24,7 +24,7 @@ export type ClaimableBalance = { address: string; amount: BigNumberish };
 
 export function parseBalanceMap(
   balances: ClaimableBalance[]
-): AirdropDistributorInfo {
+): RewardsDistributorInfo {
   const dataByAddress = balances.reduce<{
     [address: string]: {
       amount: BigNumber;

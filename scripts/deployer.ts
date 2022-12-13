@@ -3,9 +3,9 @@ import { Overrides } from "ethers";
 import { Logger } from "tslog";
 
 import {
-  AirdropDistributorInfo,
   ClaimableBalance,
   parseBalanceMap,
+  RewardsDistributorInfo,
 } from "../core/merkle/parse-accounts";
 import { AirdropDistributor } from "../types";
 
@@ -15,7 +15,7 @@ export async function deployDistributor(
   claimed: ClaimableBalance[],
   log: Logger,
   fee?: Overrides,
-): Promise<[AirdropDistributor, AirdropDistributorInfo]> {
+): Promise<[AirdropDistributor, RewardsDistributorInfo]> {
   log.info("Generating tree");
   const distributorInfo = parseBalanceMap(distributed);
   const verifier = new Verifier();
