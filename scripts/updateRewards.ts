@@ -76,7 +76,7 @@ export async function updatePoolRewards() {
     deployer,
   );
 
-  const toBlock = await deployer.provider!.getBlockNumber();
+  const toBlock = 16175801; // await deployer.provider!.getBlockNumber();
 
   const prevMerkle = await loadPrevMerkle(network, distributor);
 
@@ -121,26 +121,26 @@ export async function updatePoolRewards() {
   });
 
   const claimed = await distributor.queryFilter(
-    distributor.filters.Claimed(null, null, false),
+    distributor.filters.Claimed(),
     0,
     lastBlock,
   );
 
-  claimed.forEach(e =>
-    exportCsv.addClaimed(e.args.account, e.args.amount.div(WAD).toNumber()),
-  );
+  let totalClaimedFromContract = BigNumber.from(0);
 
-  const totalClaimed = claimed.reduce(
-    (a, b) => a.add(b.args.amount),
-    BigNumber.from(0),
-  );
+  claimed.forEach(e => {
+    exportCsv.addClaimed(e.args.account, e.args.amount.div(WAD).toNumber());
+    if (!e.args.historic) {
+      totalClaimedFromContract = totalClaimedFromContract.add(e.args.amount);
+    }
+  });
 
   const distributorInfo = parseBalanceMap(
     mapToClaimed(distributed).filter(e => !e.amount.isZero()),
   );
 
   const totalNeeded = BigNumber.from(distributorInfo.tokenTotal);
-  const diff = totalNeeded.sub(totalClaimed).sub(balance);
+  const diff = totalNeeded.sub(totalClaimedFromContract).sub(balance);
 
   console.log(
     `Total distributed: ${formatGear(
@@ -149,7 +149,7 @@ export async function updatePoolRewards() {
       totalNeeded.sub(prevMerkle.tokenTotal),
     )}`,
   );
-  console.log(`Total claimed: ${formatGear(totalClaimed)}`);
+  console.log(`Total claimed: ${formatGear(totalClaimedFromContract)}`);
   console.log(`Need to add: ${formatGear(diff)}`);
   console.log("\n");
 
