@@ -76,7 +76,7 @@ export async function updatePoolRewards() {
     deployer,
   );
 
-  const toBlock = 16175801; // await deployer.provider!.getBlockNumber();
+  const toBlock = await deployer.provider!.getBlockNumber();
 
   const prevMerkle = await loadPrevMerkle(network, distributor);
 
