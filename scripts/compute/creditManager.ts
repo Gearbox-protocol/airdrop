@@ -15,9 +15,9 @@ import {
 } from "@gearbox-protocol/sdk";
 import { BigNumber, Signer } from "ethers";
 
-import { CSVExport } from "../csv/csvExport";
-import { CreditRewards } from "../rewards/creditRewards";
-import { formatGear } from "../utils/formatter";
+import { CSVExport } from "../../core/csv/csvExport";
+import { CreditRewards } from "../../core/rewards/creditRewards";
+import { formatGear } from "../../core/utils/formatter";
 
 export async function computeCreditManagers(
   exportCsv: CSVExport,

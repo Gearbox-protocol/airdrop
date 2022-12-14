@@ -1,8 +1,8 @@
 import { NetworkType } from "@gearbox-protocol/sdk";
 import axios from "axios";
 
-import { IAirdropDistributor } from "../../types";
-import { RewardsDistributorInfo } from "../merkle/parse-accounts";
+import { RewardsDistributorInfo } from "../core/merkle/parse-accounts";
+import { IAirdropDistributor } from "../types";
 
 const cloudMerkle = (network: NetworkType, root: string) =>
   `https://am.gearbox.fi/${network.toString().toLowerCase()}_${root

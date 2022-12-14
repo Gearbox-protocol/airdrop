@@ -19,19 +19,19 @@ import * as fs from "fs";
 import { ethers } from "hardhat";
 
 import { CreditRewards } from "../core";
-import { computeCampaigns } from "../core/compute/campaign";
-import { computeCreditManagers } from "../core/compute/creditManager";
-import { computePools } from "../core/compute/pool";
 import { CSVExport } from "../core/csv/csvExport";
 import { parseBalanceMap } from "../core/merkle/parse-accounts";
 import { formatGear } from "../core/utils/formatter";
-import { loadPrevMerkle } from "../core/utils/prevMerkle";
 import {
   IAddressProvider__factory,
   IAirdropDistributor__factory,
   IERC20__factory,
 } from "../types";
+import { computeCampaigns } from "./compute/campaign";
+import { computeCreditManagers } from "./compute/creditManager";
+import { computePools } from "./compute/pool";
 import { mapToClaimed } from "./lib";
+import { loadPrevMerkle } from "./prevMerkle";
 
 export async function updatePoolRewards() {
   const distributed: Record<string, BigNumber> = {};

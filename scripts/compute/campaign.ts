@@ -1,9 +1,9 @@
 import { BigNumber } from "ethers";
 
 import { campaigns } from "../../campaigns";
-import { CSVExport } from "../csv/csvExport";
-import { RewardСampaigns } from "../rewards/airdrops";
-import { formatGear } from "../utils/formatter";
+import { CSVExport } from "../../core/csv/csvExport";
+import { RewardСampaigns } from "../../core/rewards/airdrops";
+import { formatGear } from "../../core/utils/formatter";
 
 export function computeCampaigns(
   exportCsv: CSVExport,

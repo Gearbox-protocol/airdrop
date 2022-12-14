@@ -6,9 +6,9 @@ import {
 } from "@gearbox-protocol/sdk";
 import { BigNumber, Signer } from "ethers";
 
-import { CSVExport } from "../csv/csvExport";
-import { PoolRewards } from "../rewards/poolRewards";
-import { formatGear } from "../utils/formatter";
+import { CSVExport } from "../../core/csv/csvExport";
+import { PoolRewards } from "../../core/rewards/poolRewards";
+import { formatGear } from "../../core/utils/formatter";
 
 export async function computePools(
   exportCsv: CSVExport,
