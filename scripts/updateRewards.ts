@@ -1,24 +1,9 @@
-import {
-  CREDIT_MANAGER_DAI_V2_GOERLI,
-  CREDIT_MANAGER_DAI_V2_MAINNET,
-  CREDIT_MANAGER_USDC_V2_GOERLI,
-  CREDIT_MANAGER_USDC_V2_MAINNET,
-  CREDIT_MANAGER_WBTC_V2_GOERLI,
-  CREDIT_MANAGER_WBTC_V2_MAINNET,
-  CREDIT_MANAGER_WETH_V2_GOERLI,
-  CREDIT_MANAGER_WETH_V2_MAINNET,
-  CREDIT_MANAGER_WSTETH_V2_GOERLI,
-  CREDIT_MANAGER_WSTETH_V2_MAINNET,
-  deployedContracts,
-  detectNetwork,
-  WAD,
-} from "@gearbox-protocol/sdk";
+import { detectNetwork, WAD } from "@gearbox-protocol/sdk";
 import * as dotenv from "dotenv";
 import { BigNumber } from "ethers";
 import * as fs from "fs";
 import { ethers } from "hardhat";
 
-import { CreditRewards } from "../core";
 import { computeCampaigns } from "../core/compute/campaign";
 import { computeCreditManagers } from "../core/compute/creditManager";
 import { computePools } from "../core/compute/pool";
@@ -26,6 +11,7 @@ import { CSVExport } from "../core/csv/csvExport";
 import { parseBalanceMap } from "../core/merkle/parse-accounts";
 import { formatGear } from "../core/utils/formatter";
 import { loadPrevMerkle } from "../core/utils/prevMerkle";
+import { saveMerkle } from "../core/utils/saveMerkle";
 import {
   IAddressProvider__factory,
   IAirdropDistributor__factory,
@@ -161,7 +147,10 @@ export async function updatePoolRewards() {
     "0x",
     "",
   )}`;
-  fs.writeFileSync(`./merkle/${fname}.json`, JSON.stringify(distributorInfo));
+
+  // fs.writeFileSync(`./merkle/${fname}.json`, JSON.stringify(distributorInfo));
+
+  saveMerkle(network, distributorInfo);
 
   fs.writeFileSync(
     `./merkle/${fname}.csv`,
