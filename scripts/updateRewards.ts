@@ -148,8 +148,6 @@ export async function updatePoolRewards() {
     "",
   )}`;
 
-  // fs.writeFileSync(`./merkle/${fname}.json`, JSON.stringify(distributorInfo));
-
   saveMerkle(network, distributorInfo);
 
   fs.writeFileSync(
