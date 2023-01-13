@@ -7,12 +7,14 @@ import { ethers } from "hardhat";
 import { CSVExport } from "../core/csv/csvExport";
 import { parseBalanceMap } from "../core/merkle/parse-accounts";
 import { formatGear } from "../core/utils/formatter";
+import { queryClaimed } from "../core/utils/greedQuery";
 import { saveMerkle } from "../core/utils/saveMerkle";
 import {
   IAddressProvider__factory,
   IAirdropDistributor__factory,
   IERC20__factory,
 } from "../types";
+import { ClaimedEvent } from "../types/contracts/AirdropDistributor";
 import { computeCampaigns } from "./compute/campaign";
 import { computeCreditManagers } from "./compute/creditManager";
 import { computePools } from "./compute/pool";
@@ -106,9 +108,8 @@ export async function updatePoolRewards() {
     blockTag: lastBlock,
   });
 
-  const claimed = await distributor.queryFilter(
-    distributor.filters.Claimed(),
-    0,
+  const claimed: Array<ClaimedEvent> = await queryClaimed(
+    distributor,
     lastBlock,
   );
 
