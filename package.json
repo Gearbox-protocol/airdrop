@@ -17,7 +17,7 @@
   ],
   "scripts": {
     "dev": "tsc -w -p ./tsconfig.build.json",
-    "build": "yarn build && tsc -p ./tsconfig.build.json",
+    "build": "yarn build-contract && tsc -p ./tsconfig.build.json",
     "build-contract": "yarn clean && yarn compile",
     "clean": "npx hardhat clean",
     "compile": "npx hardhat compile",
