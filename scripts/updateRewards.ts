@@ -7,7 +7,6 @@ import { ethers } from "hardhat";
 import { CSVExport } from "../core/csv/csvExport";
 import { parseBalanceMap } from "../core/merkle/parse-accounts";
 import { formatGear } from "../core/utils/formatter";
-import { queryClaimed } from "../core/utils/greedQuery";
 import { saveMerkle } from "../core/utils/saveMerkle";
 import {
   IAddressProvider__factory,
@@ -18,6 +17,7 @@ import { ClaimedEvent } from "../types/contracts/AirdropDistributor";
 import { computeCampaigns } from "./compute/campaign";
 import { computeCreditManagers } from "./compute/creditManager";
 import { computePools } from "./compute/pool";
+import { queryClaimed } from "./greedQuery";
 import { mapToClaimed } from "./lib";
 import { loadPrevMerkle } from "./prevMerkle";
 
