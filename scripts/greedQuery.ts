@@ -1,5 +1,5 @@
-import { IAirdropDistributor } from "../../types";
-import { ClaimedEvent } from "../../types/contracts/AirdropDistributor";
+import { IAirdropDistributor } from "../types";
+import { ClaimedEvent } from "../types/contracts/AirdropDistributor";
 
 export async function queryClaimed(
   distributor: IAirdropDistributor,
