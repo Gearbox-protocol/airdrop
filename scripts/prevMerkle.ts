@@ -25,6 +25,7 @@ export async function loadPrevMerkle(
 
     return rawData.data;
   } catch (e) {
+    console.log(e);
     throw new Error("Cant get previous merkle");
   }
 }
