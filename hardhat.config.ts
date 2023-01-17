@@ -53,6 +53,7 @@ const config: HardhatUserConfig = {
     },
     localhost: {
       timeout: 0,
+      accounts: [BOXCODE_PRIVATE_KEY, BVI_PRIVATE_KEY],
     },
     mainnet: {
       url: process.env.ETH_MAINNET_PROVIDER || "",
