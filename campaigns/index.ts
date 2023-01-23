@@ -4,6 +4,7 @@ import { earlyCommunityMembers } from "./02-early-community-members";
 import { earlyLiquidityProviders } from "./03-early-liquidity-providers";
 import { earlyCreditAccountUsers } from "./04-early-credit-account-users";
 import { ciderParticipants } from "./05-cider-participants";
+import { earlyGearLPs } from "./06-early-gear-lps";
 
 export interface AirdropBalance {
   address: string;
@@ -22,4 +23,5 @@ export const campaigns = [
   earlyLiquidityProviders,
   earlyCreditAccountUsers,
   ciderParticipants,
+  earlyGearLPs,
 ];

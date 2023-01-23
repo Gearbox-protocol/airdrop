@@ -5,11 +5,11 @@ import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
 import { Logger } from "tslog";
 
-import { ciderParticipants } from "../campaigns/05-cider-participants";
+import { earlyGearLPs } from "../campaigns/06-early-gear-lps";
 import { AirdropDistributor__factory } from "../types";
 import { DistributionDataStruct } from "../types/contracts/AirdropDistributor";
 
-const campaign = ciderParticipants;
+const campaign = earlyGearLPs;
 
 const fee = {
   maxFeePerGas: BigNumber.from(233e9),

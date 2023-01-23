@@ -10,6 +10,10 @@ export function saveMerkle(network: NetworkType, info: RewardsDistributorInfo) {
   )}`;
   fs.writeFileSync(`${fnamePrefix}.json`, JSON.stringify(info));
 
+  if (!fs.existsSync(fnamePrefix)) {
+    fs.mkdirSync(fnamePrefix);
+  }
+
   for (let i = 0; i < 256; i++) {
     let prefix = i.toString(16).toLowerCase();
     prefix = prefix.length === 1 ? `0${prefix}` : prefix;
@@ -19,8 +23,8 @@ export function saveMerkle(network: NetworkType, info: RewardsDistributorInfo) {
       .filter(([addr]) => addr.toLowerCase().startsWith(`0x${prefix}`))
       .reduce((res, [addr, claim]) => ({ ...res, [addr]: claim }), {});
 
-    const fname = `${fnamePrefix}_${prefix}`;
+    const fname = `${fnamePrefix}/${prefix}.json`;
 
-    fs.writeFileSync(`${fname}.json`, JSON.stringify(prefixedInfo));
+    fs.writeFileSync(fname, JSON.stringify(prefixedInfo));
   }
 }
