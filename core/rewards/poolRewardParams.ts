@@ -13,6 +13,7 @@ export const poolRewardsPerBlock: Record<
     dWETH: new RangedValue(),
     dWBTC: new RangedValue(),
     dwstETH: new RangedValue(),
+    dFRAX: new RangedValue(),
   },
   Goerli: {
     dDAI: new RangedValue(),
@@ -20,6 +21,7 @@ export const poolRewardsPerBlock: Record<
     dWETH: new RangedValue(),
     dWBTC: new RangedValue(),
     dwstETH: new RangedValue(),
+    dFRAX: new RangedValue(),
   },
 };
 
@@ -29,6 +31,7 @@ export const GEAR_PER_BLOCK: Record<DieselTokenTypes, number> = {
   dWETH: 3196,
   dWBTC: 913,
   dwstETH: 1636,
+  dFRAX: 0,
 };
 
 export const GEAR_PER_BLOCK_GIP30: Record<DieselTokenTypes, number> = {
@@ -37,6 +40,7 @@ export const GEAR_PER_BLOCK_GIP30: Record<DieselTokenTypes, number> = {
   dWETH: 4014,
   dWBTC: 457,
   dwstETH: 0,
+  dFRAX: 0,
 };
 
 const GOERLI_BLOCK = 7694030;
@@ -60,6 +64,12 @@ poolRewardsPerBlock.Goerli.dWBTC.addValue(
 poolRewardsPerBlock.Goerli.dwstETH.addValue(
   GOERLI_BLOCK,
   BigNumber.from(10).pow(18).mul(GEAR_PER_BLOCK.dwstETH).div(100),
+);
+
+const GOERLI_BLOCK_FRAX = 7694030;
+poolRewardsPerBlock.Goerli.dFRAX.addValue(
+  GOERLI_BLOCK_FRAX,
+  BigNumber.from(10).pow(18).mul(GEAR_PER_BLOCK.dFRAX).div(100),
 );
 
 const MAINNET_BLOCK = 15820000;
@@ -108,4 +118,10 @@ poolRewardsPerBlock.Mainnet.dWBTC.addValue(
 poolRewardsPerBlock.Mainnet.dwstETH.addValue(
   MAINNET_BLOCK_GIP30,
   BigNumber.from(10).pow(18).mul(GEAR_PER_BLOCK_GIP30.dwstETH).div(100),
+);
+
+const MAINNET_BLOCK_FRAX = 15977000;
+poolRewardsPerBlock.Mainnet.dFRAX.addValue(
+  MAINNET_BLOCK_FRAX,
+  BigNumber.from(10).pow(18).mul(GEAR_PER_BLOCK_GIP30.dFRAX).div(100),
 );
