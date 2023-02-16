@@ -1,6 +1,7 @@
 import {
   CREDIT_MANAGER_DAI_V2_GOERLI,
   CREDIT_MANAGER_DAI_V2_MAINNET,
+  CREDIT_MANAGER_FRAX_V2_MAINNET,
   CREDIT_MANAGER_USDC_V2_GOERLI,
   CREDIT_MANAGER_USDC_V2_MAINNET,
   CREDIT_MANAGER_WBTC_V2_GOERLI,
@@ -11,7 +12,6 @@ import {
   CREDIT_MANAGER_WSTETH_V2_MAINNET,
   CreditManagersV2,
   DieselTokenTypes,
-  CREDIT_MANAGER_FRAX_V2_MAINNET,
 } from "@gearbox-protocol/sdk";
 import { BigNumber } from "ethers";
 
@@ -90,6 +90,6 @@ creditRewardsPerBlock[CREDIT_MANAGER_WBTC_V2_MAINNET].addValue(
 
 const FRAX_MAINNET_BLOCK = 16033000;
 creditRewardsPerBlock[CREDIT_MANAGER_FRAX_V2_MAINNET].addValue(
-  MAINNET_BLOCK,
+  FRAX_MAINNET_BLOCK,
   BigNumber.from(10).pow(18).mul(GEAR_PER_BLOCK.dFRAX).div(100),
 );
