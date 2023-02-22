@@ -17,8 +17,12 @@ export class RangedValue {
   protected data: Map<number, BigNumber> = new Map();
   protected _keys: Array<number> = [];
 
-  constructor(props?: RangedValuesProps) {
-    const { initialValue = BigNumber.from(0), data, keys = [] } = props || {};
+  constructor(props?: Partial<RangedValuesProps>) {
+    const {
+      initialValue = BigNumber.from(0),
+      data = [],
+      keys = [],
+    } = props || {};
 
     this.initialValue = initialValue;
     this.data = new Map(data);

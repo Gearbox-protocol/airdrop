@@ -28,7 +28,11 @@ describe("CreditRewards test", () => {
 
     const rewardPerBlock = new RangedValue();
     rewardPerBlock.addValue(1000, BigNumber.from(1000));
-    const r = CreditRewards.parseEvents(events, rewardPerBlock, 2000);
+    const r = CreditRewards.formatEvents(
+      CreditRewards.parseCMEvents(events),
+      rewardPerBlock,
+      2000,
+    );
 
     expect(r).to.be.eql([
       {
@@ -48,7 +52,11 @@ describe("CreditRewards test", () => {
 
     const rewardPerBlock = new RangedValue();
     rewardPerBlock.addValue(1000, BigNumber.from(1000));
-    const r = CreditRewards.parseEvents(events, rewardPerBlock, 2000);
+    const r = CreditRewards.formatEvents(
+      CreditRewards.parseCMEvents(events),
+      rewardPerBlock,
+      2000,
+    );
 
     expect(r).to.be.eql([
       {
@@ -70,7 +78,11 @@ describe("CreditRewards test", () => {
 
     const rewardPerBlock = new RangedValue();
     rewardPerBlock.addValue(1000, BigNumber.from(1000));
-    const r = CreditRewards.parseEvents(events, rewardPerBlock, 2000);
+    const r = CreditRewards.formatEvents(
+      CreditRewards.parseCMEvents(events),
+      rewardPerBlock,
+      2000,
+    );
 
     expect(r).to.be.eql([
       {
@@ -96,7 +108,11 @@ describe("CreditRewards test", () => {
 
     const rewardPerBlock = new RangedValue();
     rewardPerBlock.addValue(1000, BigNumber.from(1000));
-    const r = CreditRewards.parseEvents(events, rewardPerBlock, 2000);
+    const r = CreditRewards.formatEvents(
+      CreditRewards.parseCMEvents(events),
+      rewardPerBlock,
+      2000,
+    );
 
     expect(r).to.be.eql([
       {
@@ -123,7 +139,11 @@ describe("CreditRewards test", () => {
 
     const rewardPerBlock = new RangedValue();
     rewardPerBlock.addValue(1000, BigNumber.from(1000));
-    const r = CreditRewards.parseEvents(events, rewardPerBlock, 2000);
+    const r = CreditRewards.formatEvents(
+      CreditRewards.parseCMEvents(events),
+      rewardPerBlock,
+      2000,
+    );
 
     expect(r).to.be.eql([
       {
@@ -148,7 +168,11 @@ describe("CreditRewards test", () => {
 
     const rewardPerBlock = new RangedValue();
     rewardPerBlock.addValue(1000, BigNumber.from(1000));
-    const r = CreditRewards.parseEvents(events, rewardPerBlock, 2000);
+    const r = CreditRewards.formatEvents(
+      CreditRewards.parseCMEvents(events),
+      rewardPerBlock,
+      2000,
+    );
 
     expect(r).to.be.eql([
       {
