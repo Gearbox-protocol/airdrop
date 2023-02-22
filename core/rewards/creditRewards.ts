@@ -29,13 +29,11 @@ export class CreditRewards {
       toBlock,
     );
 
-    const rewardToAddress = rewards.filter(
-      r => r.address === address.toLowerCase(),
-    );
+    const addressLC = address.toLowerCase();
+    const rewardFound = rewards.find(r => r.address === addressLC);
+    const reward = !rewardFound ? BigNumber.from(0) : rewardFound.amount;
 
-    return rewardToAddress.length === 0
-      ? BigNumber.from(0)
-      : rewardToAddress[0].amount;
+    return reward;
   }
 
   static async computeAllRewards(
@@ -45,41 +43,29 @@ export class CreditRewards {
   ): Promise<Array<Reward>> {
     const toBlockQuery = toBlock || (await provider.getBlockNumber());
 
-    const cm = ICreditManagerV2__factory.connect(creditManager, provider);
-    const cc = ICreditConfigurator__factory.connect(
-      await cm.creditConfigurator(),
+    const events = await this.getCMEvents(
+      creditManager,
       provider,
+      toBlockQuery,
     );
 
-    const creditFacadesEvents = await cc.queryFilter(
-      cc.filters.CreditFacadeUpgraded(),
-    );
+    const rewardPerBlock = this.getRewardsRange(creditManager);
+    const parsed = this.parseCMEvents(events);
 
-    const events: Array<TypedEvent> = [];
-
-    for (const cfe of creditFacadesEvents) {
-      const query = await CreditRewards.query(
-        cfe.args.newCreditFacade,
-        provider,
-        toBlockQuery,
-      );
-      events.push(...query);
-    }
-
-    const rewardPerBlock = CreditRewards.getRewardsRange(
-      creditManager.toLowerCase(),
-    );
-
-    return CreditRewards.parseEvents(events, rewardPerBlock, toBlockQuery);
+    return this.formatEvents(parsed, rewardPerBlock, toBlockQuery);
   }
 
-  static parseEvents(
-    events: Array<TypedEvent>,
+  static formatEvents(
+    parsed: {
+      borrowedRange: Record<string, RangedValue>;
+      totalBorrowedRange: RangedValue;
+      borrowed: Record<string, BigNumber>;
+      totalBorrowed: BigNumber;
+    },
     rewardPerBlock: RangedValue,
     toBlock: number,
   ): Array<Reward> {
-    const { borrowedRange, totalBorrowedRange, borrowed } =
-      CreditRewards.parseCMEvents(events);
+    const { borrowed, borrowedRange, totalBorrowedRange } = parsed;
 
     return Object.keys(borrowed).map(address => ({
       address: address.toLowerCase(),
@@ -187,28 +173,15 @@ export class CreditRewards {
   ) {
     const toBlockQuery = toBlock || (await provider.getBlockNumber());
 
-    const cm = ICreditManagerV2__factory.connect(creditManager, provider);
-    const cc = ICreditConfigurator__factory.connect(
-      await cm.creditConfigurator(),
+    const events = await this.getCMEvents(
+      creditManager,
       provider,
+      toBlockQuery,
     );
 
-    const creditFacadesEvents = await cc.queryFilter(
-      cc.filters.CreditFacadeUpgraded(),
-    );
+    const parsed = CreditRewards.parseCMEvents(events);
 
-    const events: Array<TypedEvent> = [];
-
-    for (const cfe of creditFacadesEvents) {
-      const query = await CreditRewards.query(
-        cfe.args.newCreditFacade,
-        provider,
-        toBlockQuery,
-      );
-      events.push(...query);
-    }
-
-    return CreditRewards.parseCMEvents(events);
+    return parsed;
   }
 
   static computeRewardInt(
@@ -248,6 +221,34 @@ export class CreditRewards {
     return total;
   }
 
+  protected static async getCMEvents(
+    creditManager: string,
+    provider: providers.Provider,
+    toBlock: number,
+  ) {
+    const cm = ICreditManagerV2__factory.connect(creditManager, provider);
+    const cc = ICreditConfigurator__factory.connect(
+      await cm.creditConfigurator(),
+      provider,
+    );
+
+    const creditFacadesEvents = await cc.queryFilter(
+      cc.filters.CreditFacadeUpgraded(),
+      0,
+      toBlock,
+    );
+
+    const events: Array<TypedEvent> = (
+      await Promise.all(
+        creditFacadesEvents.map(cfe =>
+          CreditRewards.query(cfe.args.newCreditFacade, provider, toBlock),
+        ),
+      )
+    ).flat(1);
+
+    return events;
+  }
+
   protected static async query(
     creditFacade: string,
     provider: providers.Provider,
@@ -285,10 +286,11 @@ export class CreditRewards {
   }
 
   protected static getRewardsRange(creditManager: string): RangedValue {
-    const rewardPerBlock = creditRewardsPerBlock[creditManager];
+    const cmLC = creditManager.toLowerCase();
+    const rewardPerBlock = creditRewardsPerBlock[cmLC];
 
     if (!rewardPerBlock)
-      throw new Error(`Unknown credit manager token ${creditManager}`);
+      throw new Error(`Unknown credit manager token ${cmLC}`);
     return rewardPerBlock;
   }
 }

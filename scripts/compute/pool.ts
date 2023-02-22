@@ -10,6 +10,14 @@ import { CSVExport } from "../../core/csv/csvExport";
 import { PoolRewards } from "../../core/rewards/poolRewards";
 import { formatGear } from "../../core/utils/formatter";
 
+const dieselTokens: Array<SupportedToken> = [
+  "dDAI",
+  "dUSDC",
+  "dWETH",
+  "dWBTC",
+  "dwstETH",
+];
+
 export async function computePools(
   exportCsv: CSVExport,
   distributed: Record<string, BigNumber>,
@@ -18,14 +26,6 @@ export async function computePools(
   prevBlock: number,
   deployer: Signer,
 ) {
-  const dieselTokens: Array<SupportedToken> = [
-    "dDAI",
-    "dUSDC",
-    "dWETH",
-    "dWBTC",
-    "dwstETH",
-  ];
-
   for (const dToken of dieselTokens) {
     try {
       let total = BigNumber.from(0);

@@ -20,6 +20,25 @@ import { CSVExport } from "../../core/csv/csvExport";
 import { CreditRewards } from "../../core/rewards/creditRewards";
 import { formatGear } from "../../core/utils/formatter";
 
+function getRewardCMs(network: NetworkType) {
+  return network === "Mainnet"
+    ? [
+        CREDIT_MANAGER_DAI_V2_MAINNET,
+        CREDIT_MANAGER_USDC_V2_MAINNET,
+        CREDIT_MANAGER_WETH_V2_MAINNET,
+        CREDIT_MANAGER_WSTETH_V2_MAINNET,
+        CREDIT_MANAGER_WBTC_V2_MAINNET,
+        CREDIT_MANAGER_FRAX_V2_MAINNET,
+      ]
+    : [
+        CREDIT_MANAGER_DAI_V2_GOERLI,
+        CREDIT_MANAGER_USDC_V2_GOERLI,
+        CREDIT_MANAGER_WETH_V2_GOERLI,
+        CREDIT_MANAGER_WSTETH_V2_GOERLI,
+        CREDIT_MANAGER_WBTC_V2_GOERLI,
+      ];
+}
+
 export async function computeCreditManagers(
   exportCsv: CSVExport,
   distributed: Record<string, BigNumber>,
@@ -28,23 +47,7 @@ export async function computeCreditManagers(
   prevBlock: number,
   deployer: Signer,
 ) {
-  const cms =
-    network === "Mainnet"
-      ? [
-          CREDIT_MANAGER_DAI_V2_MAINNET,
-          CREDIT_MANAGER_USDC_V2_MAINNET,
-          CREDIT_MANAGER_WETH_V2_MAINNET,
-          CREDIT_MANAGER_WSTETH_V2_MAINNET,
-          CREDIT_MANAGER_WBTC_V2_MAINNET,
-          CREDIT_MANAGER_FRAX_V2_MAINNET,
-        ]
-      : [
-          CREDIT_MANAGER_DAI_V2_GOERLI,
-          CREDIT_MANAGER_USDC_V2_GOERLI,
-          CREDIT_MANAGER_WETH_V2_GOERLI,
-          CREDIT_MANAGER_WSTETH_V2_GOERLI,
-          CREDIT_MANAGER_WBTC_V2_GOERLI,
-        ];
+  const cms = getRewardCMs(network);
 
   for (const cm of cms) {
     let total = BigNumber.from(0);

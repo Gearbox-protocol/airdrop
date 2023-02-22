@@ -5,7 +5,7 @@ import { RangedValue } from "./range";
 
 describe("RangedValue test", () => {
   it("addValue and getValue works correctly", () => {
-    const r = new RangedValue(BigNumber.from(5));
+    const r = new RangedValue({ initialValue: BigNumber.from(5) });
 
     expect(r.getValue(5).toNumber()).to.be.eq(5);
 
