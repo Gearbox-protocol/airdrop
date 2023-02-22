@@ -1,12 +1,28 @@
 import { BigNumber } from "ethers";
 
+interface RangedValuesProps {
+  keys: Array<number>;
+  data: Array<[number, BigNumber]>;
+  initialValue: BigNumber;
+}
+
+interface ParsedRangedValuesProps {
+  keys: Array<number>;
+  data: Array<[number, string]>;
+  initialValue: string;
+}
+
 export class RangedValue {
   protected initialValue: BigNumber;
   protected data: Map<number, BigNumber> = new Map();
   protected _keys: Array<number> = [];
 
-  constructor(initialValue?: BigNumber) {
-    this.initialValue = initialValue || BigNumber.from(0);
+  constructor(props?: RangedValuesProps) {
+    const { initialValue = BigNumber.from(0), data, keys = [] } = props || {};
+
+    this.initialValue = initialValue;
+    this.data = new Map(data);
+    this._keys = keys;
   }
   addValue(from: number, value: BigNumber) {
     this.data.set(from, value);
@@ -61,5 +77,30 @@ export class RangedValue {
 
   get keys(): Array<number> {
     return this._keys;
+  }
+
+  static fromString(jsonString?: string | null) {
+    if (!jsonString) return new RangedValue();
+
+    const parsedObject: ParsedRangedValuesProps = JSON.parse(jsonString);
+    const transformed: RangedValuesProps = {
+      ...parsedObject,
+      initialValue: BigNumber.from(parsedObject.initialValue),
+      data: parsedObject.data.map(([key, value]) => [
+        key,
+        BigNumber.from(value),
+      ]),
+    };
+
+    return new RangedValue(transformed);
+  }
+
+  toString(): string {
+    const toStringify: RangedValuesProps = {
+      data: Array.from(this.data.entries()),
+      keys: this._keys,
+      initialValue: this.initialValue,
+    };
+    return JSON.stringify(toStringify);
   }
 }

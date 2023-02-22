@@ -26,20 +26,21 @@ export class PoolRewards {
   ): Promise<BigNumber> {
     const toBlockQuery = toBlock || (await provider.getBlockNumber());
 
-    const query = await PoolRewards.query(dieselToken, provider, toBlockQuery);
+    const events = await PoolRewards.query(dieselToken, provider, toBlockQuery);
 
-    const balanceRange = new RangedValue();
-    const totalSupplyRange = new RangedValue();
     const rewardPerBlock = PoolRewards.getRewardsRange(
       dieselToken,
       networkType,
     );
     const addrLC = address.toLowerCase();
 
+    const balanceRange = new RangedValue();
+    const totalSupplyRange = new RangedValue();
+
     let totalSupply = BigNumber.from(0);
     let balance = BigNumber.from(0);
 
-    query.forEach(e => {
+    events.forEach(e => {
       const from = e.args.from.toLowerCase();
       if (from === ADDRESS_0X0) {
         totalSupply = totalSupply.add(e.args.value);
@@ -59,12 +60,14 @@ export class PoolRewards {
       }
     });
 
-    return PoolRewards.computeRewardInt(
+    const reward = PoolRewards.computeRewardInt(
       toBlockQuery,
       balanceRange,
       totalSupplyRange,
       rewardPerBlock,
     );
+
+    return reward;
   }
 
   static async computeAllRewards(
@@ -74,43 +77,14 @@ export class PoolRewards {
     toBlock?: number,
   ): Promise<Array<Reward>> {
     const toBlockQuery = toBlock || (await provider.getBlockNumber());
-    const query = await PoolRewards.query(dieselToken, provider, toBlockQuery);
 
-    const totalSupplyRange = new RangedValue();
+    const { totalSupplyRange, balancesRange, balances } =
+      await this.computeAllRanges(dieselToken, provider, toBlockQuery);
+
     const rewardPerBlock = PoolRewards.getRewardsRange(
       dieselToken,
       networkType,
     );
-    const balancesRange: Record<string, RangedValue> = {};
-
-    let totalSupply = BigNumber.from(0);
-    let balances: Record<string, BigNumber> = {};
-
-    query
-      .filter(e => !e.args.value.isZero())
-      .forEach(e => {
-        const from = e.args.from.toLowerCase();
-        if (from === ADDRESS_0X0) {
-          totalSupply = totalSupply.add(e.args.value);
-          totalSupplyRange.addValue(e.blockNumber, totalSupply);
-        } else {
-          balances[from] = balances[from].sub(e.args.value);
-          balancesRange[from].addValue(e.blockNumber, balances[from]);
-        }
-
-        const to = e.args.to.toLowerCase();
-        if (to === ADDRESS_0X0) {
-          totalSupply = totalSupply.sub(e.args.value);
-          totalSupplyRange.addValue(e.blockNumber, totalSupply);
-        } else {
-          if (!balances[to]) {
-            balances[to] = BigNumber.from(0);
-            balancesRange[to] = new RangedValue();
-          }
-          balances[to] = balances[to].add(e.args.value);
-          balancesRange[to].addValue(e.blockNumber, balances[to]);
-        }
-      });
 
     return Object.keys(balances).map(address => ({
       address,
@@ -158,6 +132,53 @@ export class PoolRewards {
     }
 
     return total;
+  }
+
+  static async computeAllRanges(
+    dieselToken: string,
+    provider: providers.Provider,
+    toBlock: number,
+  ) {
+    const query = await PoolRewards.query(dieselToken, provider, toBlock);
+
+    const totalSupplyRange = new RangedValue();
+    const balancesRange: Record<string, RangedValue> = {};
+
+    let totalSupply = BigNumber.from(0);
+    let balances: Record<string, BigNumber> = {};
+
+    query
+      .filter(e => !e.args.value.isZero())
+      .forEach(e => {
+        const from = e.args.from.toLowerCase();
+        if (from === ADDRESS_0X0) {
+          totalSupply = totalSupply.add(e.args.value);
+          totalSupplyRange.addValue(e.blockNumber, totalSupply);
+        } else {
+          balances[from] = balances[from].sub(e.args.value);
+          balancesRange[from].addValue(e.blockNumber, balances[from]);
+        }
+
+        const to = e.args.to.toLowerCase();
+        if (to === ADDRESS_0X0) {
+          totalSupply = totalSupply.sub(e.args.value);
+          totalSupplyRange.addValue(e.blockNumber, totalSupply);
+        } else {
+          if (!balances[to]) {
+            balances[to] = BigNumber.from(0);
+            balancesRange[to] = new RangedValue();
+          }
+          balances[to] = balances[to].add(e.args.value);
+          balancesRange[to].addValue(e.blockNumber, balances[to]);
+        }
+      });
+
+    return {
+      totalSupplyRange,
+      balancesRange,
+      totalSupply,
+      balances,
+    };
   }
 
   protected static async query(
