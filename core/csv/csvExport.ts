@@ -5,6 +5,23 @@ export class CSVExport {
   protected data: Record<string, Record<string, number>> = {};
   protected claimed: Record<string, number> = {};
 
+  renameRow(from: string, to: string) {
+    const fromLC = from.toLowerCase();
+    const toLC = to.toLowerCase();
+
+    const fromData = this.data[fromLC];
+    if (fromData) {
+      this.data[toLC] = fromData;
+      delete this.data[fromLC];
+    }
+
+    const fromClaimed = this.claimed[fromLC];
+    if (fromClaimed) {
+      this.claimed[toLC] = fromClaimed;
+      delete this.claimed[fromLC];
+    }
+  }
+
   additem(address: string, column: string, value: number) {
     const columnLC = column.toLowerCase();
     const addressLC = address.toLowerCase();

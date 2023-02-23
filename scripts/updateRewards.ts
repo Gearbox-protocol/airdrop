@@ -122,6 +122,16 @@ export async function updatePoolRewards() {
     }
   });
 
+  const from = "0xba12222222228d8ba445958a75a0704d566bf2c8";
+  const to = "0xc38c5f97b34e175ffd35407fc91a937300e33860";
+
+  const distributedFrom = distributed[from];
+  if (distributedFrom) {
+    distributed[to] = distributedFrom;
+    delete distributed[from];
+  }
+  exportCsv.renameRow(from, to);
+
   const distributorInfo = parseBalanceMap(
     mapToClaimed(distributed).filter(e => !e.amount.isZero()),
   );
