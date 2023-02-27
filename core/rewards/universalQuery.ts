@@ -23,7 +23,10 @@ interface ReadEventsRangeProps<T> {
   state: State<T>;
 }
 
-const ERROR_10K = "query returned more than 10000 results";
+const ERROR_10K = [
+  "query returned more than 10000 results",
+  "range with a cap of 10k logs",
+];
 
 export class UniversalQuery {
   static async query<T>({
@@ -107,7 +110,7 @@ export class UniversalQuery {
       typeof e === "object" &&
       e.message &&
       typeof e.message === "string" &&
-      e.message.toLowerCase().includes(ERROR_10K)
+      ERROR_10K.some(str => e.message.toLowerCase().includes(str))
     );
   }
 }
