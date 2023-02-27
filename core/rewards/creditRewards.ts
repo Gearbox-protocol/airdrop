@@ -13,7 +13,7 @@ import { TypedEvent } from "@gearbox-protocol/sdk/lib/types/common";
 import { BigNumber, providers } from "ethers";
 
 import { creditRewardsPerBlock } from "./creditRewardParams";
-import { UniversalQuery } from "./fetchService";
+import { UniversalQuery } from "./universalQuery";
 import { Reward } from "./poolRewards";
 import { RangedValue } from "./range";
 
