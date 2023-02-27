@@ -40,7 +40,7 @@ export const GEAR_PER_BLOCK_GIP30: Record<DieselTokenTypes, number> = {
   dWETH: 4014,
   dWBTC: 457,
   dwstETH: 0,
-  dFRAX: 0,
+  dFRAX: 641,
 };
 
 const GOERLI_BLOCK = 7694030;
@@ -120,7 +120,7 @@ poolRewardsPerBlock.Mainnet.dwstETH.addValue(
   BigNumber.from(10).pow(18).mul(GEAR_PER_BLOCK_GIP30.dwstETH).div(100),
 );
 
-const MAINNET_BLOCK_FRAX = 15977000;
+const MAINNET_BLOCK_FRAX = 16720000;
 poolRewardsPerBlock.Mainnet.dFRAX.addValue(
   MAINNET_BLOCK_FRAX,
   BigNumber.from(10).pow(18).mul(GEAR_PER_BLOCK_GIP30.dFRAX).div(100),

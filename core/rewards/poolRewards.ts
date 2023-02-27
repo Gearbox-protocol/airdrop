@@ -3,14 +3,24 @@ import {
   DieselTokenTypes,
   IERC20__factory,
   NetworkType,
+  SupportedToken,
   tokenSymbolByAddress,
 } from "@gearbox-protocol/sdk";
 import { TransferEvent } from "@gearbox-protocol/sdk/lib/types/@openzeppelin/contracts/token/ERC20/IERC20";
 import { BigNumber, providers } from "ethers";
 
-import { UniversalQuery } from "./fetchService";
 import { poolRewardsPerBlock } from "./poolRewardParams";
 import { RangedValue } from "./range";
+import { UniversalQuery } from "./universalQuery";
+
+export const POOL_REWARDS_DIESEL_TOKENS: Array<SupportedToken> = [
+  "dDAI",
+  "dUSDC",
+  "dWETH",
+  "dWBTC",
+  "dwstETH",
+  "dFRAX",
+];
 
 export interface Reward {
   address: string;

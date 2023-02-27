@@ -13,9 +13,9 @@ import { TypedEvent } from "@gearbox-protocol/sdk/lib/types/common";
 import { BigNumber, providers } from "ethers";
 
 import { creditRewardsPerBlock } from "./creditRewardParams";
-import { UniversalQuery } from "./fetchService";
 import { Reward } from "./poolRewards";
 import { RangedValue } from "./range";
+import { UniversalQuery } from "./universalQuery";
 
 export class CreditRewards {
   static async computeReward(

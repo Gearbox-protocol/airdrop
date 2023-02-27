@@ -7,16 +7,11 @@ import {
 import { BigNumber, Signer } from "ethers";
 
 import { CSVExport } from "../../core/csv/csvExport";
-import { PoolRewards } from "../../core/rewards/poolRewards";
+import {
+  POOL_REWARDS_DIESEL_TOKENS,
+  PoolRewards,
+} from "../../core/rewards/poolRewards";
 import { formatGear } from "../../core/utils/formatter";
-
-const dieselTokens: Array<SupportedToken> = [
-  "dDAI",
-  "dUSDC",
-  "dWETH",
-  "dWBTC",
-  "dwstETH",
-];
 
 export async function computePools(
   exportCsv: CSVExport,
@@ -26,7 +21,7 @@ export async function computePools(
   prevBlock: number,
   deployer: Signer,
 ) {
-  for (const dToken of dieselTokens) {
+  for (const dToken of POOL_REWARDS_DIESEL_TOKENS) {
     try {
       let total = BigNumber.from(0);
       const poolRewards = await PoolRewards.computeAllRewards(
