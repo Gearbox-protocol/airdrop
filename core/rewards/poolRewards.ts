@@ -132,7 +132,8 @@ export class PoolRewards {
     for (let i = 0; i < keys.length; i++) {
       const curBlock = keys[i];
       const nextBlock = i === keys.length - 1 ? toBlock : keys[i + 1];
-      if (!totalSupplyArr[i].isZero()) {
+
+      if (!totalSupplyArr[i].isZero() && curBlock <= nextBlock) {
         total = total.add(
           balancesArr[i]
             .mul(nextBlock - curBlock)
