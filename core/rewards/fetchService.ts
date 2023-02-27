@@ -1,6 +1,6 @@
 type Action<T> = (start: number, end: number) => Promise<Array<T>>;
 
-type ParseEventsProps<T> = {
+interface ParseEventsProps<T> {
   action: Action<T>;
   initialOffset?: number;
   start: number;
@@ -8,20 +8,20 @@ type ParseEventsProps<T> = {
 
   loggerPrefix?: string;
   loggerEnabled?: boolean;
-};
+}
 
-type State<T> = {
+interface State<T> {
   acc: Array<T>;
   logger: Logger;
   counter: Counter;
-};
+}
 
-type ReadEventsRangeProps<T> = {
+interface ReadEventsRangeProps<T> {
   action: Action<T>;
   start: number;
   end: number;
   state: State<T>;
-};
+}
 
 const ERROR_10K = "query returned more than 10000 results";
 
@@ -39,18 +39,19 @@ export class UniversalQuery {
     const logger = new Logger(loggerPrefix, loggerEnabled);
     const counter = new Counter();
 
-    initialOffset
-      ? await this.recursiveQuery({
-          action,
-          start: 0,
-          end: initialOffset,
-          state: {
-            acc: arr,
-            logger,
-            counter,
-          },
-        })
-      : undefined;
+    if (initialOffset !== undefined) {
+      await this.recursiveQuery({
+        action,
+        start: 0,
+        end: initialOffset,
+        state: {
+          acc: arr,
+          logger,
+          counter,
+        },
+      });
+    }
+
     await this.recursiveQuery({
       action,
       start,

@@ -7,8 +7,8 @@ import {
 } from "@gearbox-protocol/sdk";
 import { TransferEvent } from "@gearbox-protocol/sdk/lib/types/@openzeppelin/contracts/token/ERC20/IERC20";
 import { BigNumber, providers } from "ethers";
-import { UniversalQuery } from "./fetchService";
 
+import { UniversalQuery } from "./fetchService";
 import { poolRewardsPerBlock } from "./poolRewardParams";
 import { RangedValue } from "./range";
 
