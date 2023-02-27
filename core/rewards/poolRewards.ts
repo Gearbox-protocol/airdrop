@@ -7,6 +7,7 @@ import {
 } from "@gearbox-protocol/sdk";
 import { TransferEvent } from "@gearbox-protocol/sdk/lib/types/@openzeppelin/contracts/token/ERC20/IERC20";
 import { BigNumber, providers } from "ethers";
+import { UniversalQuery } from "./fetchService";
 
 import { poolRewardsPerBlock } from "./poolRewardParams";
 import { RangedValue } from "./range";
@@ -187,7 +188,17 @@ export class PoolRewards {
     toBlock: number,
   ): Promise<Array<TransferEvent>> {
     const token = IERC20__factory.connect(dieselToken, provider);
-    return await token.queryFilter(token.filters.Transfer(), 0, toBlock);
+
+    const events = await UniversalQuery.query({
+      action: (start, end) =>
+        token.queryFilter(token.filters.Transfer(), start, end),
+      start: 0,
+      end: toBlock,
+
+      loggerPrefix: "Pool",
+    });
+
+    return events;
   }
 
   protected static getRewardsRange(

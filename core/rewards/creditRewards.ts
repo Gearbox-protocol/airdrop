@@ -13,6 +13,7 @@ import { TypedEvent } from "@gearbox-protocol/sdk/lib/types/common";
 import { BigNumber, providers } from "ethers";
 
 import { creditRewardsPerBlock } from "./creditRewardParams";
+import { UniversalQuery } from "./fetchService";
 import { Reward } from "./poolRewards";
 import { RangedValue } from "./range";
 
@@ -273,16 +274,23 @@ export class CreditRewards {
       ),
     };
 
-    const logs = await cf.queryFilter(
-      {
-        address: cf.address,
-        topics: [Object.values(topics)],
-      },
-      undefined,
-      toBlock,
-    );
+    const events = await UniversalQuery.query({
+      action: (start, end) =>
+        cf.queryFilter(
+          {
+            address: cf.address,
+            topics: [Object.values(topics)],
+          },
+          start,
+          end,
+        ),
+      start: 0,
+      end: toBlock,
 
-    return logs;
+      loggerPrefix: "CM",
+    });
+
+    return events;
   }
 
   protected static getRewardsRange(creditManager: string): RangedValue {
