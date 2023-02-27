@@ -5,6 +5,38 @@ export class CSVExport {
   protected data: Record<string, Record<string, number>> = {};
   protected claimed: Record<string, number> = {};
 
+  redirectRewards(from: string, to: string) {
+    const fromLC = from.toLowerCase();
+    const toLC = to.toLowerCase();
+
+    const fromData = this.data[fromLC];
+    if (fromData) {
+      const toData = this.data[toLC] || {};
+
+      this.data[toLC] = this.sumRows(fromData, toData);
+      delete this.data[fromLC];
+    }
+
+    const fromClaimed = this.claimed[fromLC];
+    if (fromClaimed) {
+      const toClaimed = this.claimed[toLC] || 0;
+
+      this.claimed[toLC] = fromClaimed + toClaimed;
+      delete this.claimed[fromLC];
+    }
+  }
+
+  sumRows(rowA: Record<string, number>, rowB: Record<string, number>) {
+    const commonSum = Object.fromEntries(
+      Object.entries(rowA).map(([key, value]) => [
+        key,
+        (rowB[key] || 0) + value,
+      ]),
+    );
+
+    return { ...rowA, ...rowB, ...commonSum };
+  }
+
   additem(address: string, column: string, value: number) {
     const columnLC = column.toLowerCase();
     const addressLC = address.toLowerCase();

@@ -122,6 +122,25 @@ export async function updatePoolRewards() {
     }
   });
 
+  const redirectRewardsPairs: Array<[string, string]> = [
+    [
+      "0xba12222222228d8ba445958a75a0704d566bf2c8",
+      "0xc38c5f97b34e175ffd35407fc91a937300e33860",
+    ],
+  ];
+
+  redirectRewardsPairs.forEach(([from, to]) => {
+    const distributedFrom = distributed[from];
+
+    if (distributedFrom) {
+      const distributedTo = distributed[to] || BigNumber.from(0);
+
+      distributed[to] = distributedFrom.add(distributedTo);
+      delete distributed[from];
+    }
+    exportCsv.redirectRewards(from, to);
+  });
+
   const distributorInfo = parseBalanceMap(
     mapToClaimed(distributed).filter(e => !e.amount.isZero()),
   );
