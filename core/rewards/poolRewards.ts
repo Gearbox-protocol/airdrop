@@ -9,9 +9,9 @@ import {
 import { TransferEvent } from "@gearbox-protocol/sdk/lib/types/@openzeppelin/contracts/token/ERC20/IERC20";
 import { BigNumber, providers } from "ethers";
 
-import { UniversalQuery } from "./universalQuery";
 import { poolRewardsPerBlock } from "./poolRewardParams";
 import { RangedValue } from "./range";
+import { UniversalQuery } from "./universalQuery";
 
 export const POOL_REWARDS_DIESEL_TOKENS: Array<SupportedToken> = [
   "dDAI",

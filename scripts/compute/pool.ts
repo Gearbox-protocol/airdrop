@@ -8,8 +8,8 @@ import { BigNumber, Signer } from "ethers";
 
 import { CSVExport } from "../../core/csv/csvExport";
 import {
-  PoolRewards,
   POOL_REWARDS_DIESEL_TOKENS,
+  PoolRewards,
 } from "../../core/rewards/poolRewards";
 import { formatGear } from "../../core/utils/formatter";
 
