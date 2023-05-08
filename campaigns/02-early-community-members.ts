@@ -4532,6 +4532,7 @@ export const earlyCommunityMembers: Campaign = {
     { address: "0xff33cef7ea7a43efabcc90d56694b6476d5898df", amount: 50000 },
     { address: "0xff75136079ab7cb0f13e472f92bac362cba077ea", amount: 30000 },
     { address: "0xfff864adc178e6193f0874898fbdbfd5e1e964bd", amount: 20000 },
+    { address: "0xa1Cd2838D7D402176BC9D260b957ace715fE2Af1", amount: 5 },
   ],
   claimed: [
     { address: "0x28925e26c919106396e50f64ED163B5009E3A2ab", amount: 20000 },
