@@ -19,3 +19,4 @@ GEAR tokens were awarded over multiple community distribution stages, each with 
 1. Run `yarn update` for mainnet or `yarn update-goerli` for goerli
 2. The script creates json file and csv with updated data in `merkle` folder
 3. Push new files into repository
+ 
