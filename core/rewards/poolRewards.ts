@@ -56,19 +56,19 @@ export class PoolRewards {
       const from = e.args.from.toLowerCase();
       const eventValue = toBigInt(e.args.value);
       if (from === ADDRESS_0X0) {
-        totalSupply = totalSupply + eventValue;
+        totalSupply = totalSupply + toBigInt(e.args.value);
         totalSupplyRange.addValue(e.blockNumber, totalSupply);
       } else if (from === addrLC) {
-        balance = balance - eventValue;
+        balance = balance - toBigInt(e.args.value);
         balanceRange.addValue(e.blockNumber, balance);
       }
 
       const to = e.args.to.toLowerCase();
       if (to === ADDRESS_0X0) {
-        totalSupply = totalSupply - eventValue;
+        totalSupply = totalSupply - toBigInt(e.args.value);
         totalSupplyRange.addValue(e.blockNumber, totalSupply);
       } else if (to === addrLC) {
-        balance = balance + eventValue;
+        balance = balance + toBigInt(e.args.value);
         balanceRange.addValue(e.blockNumber, balance);
       }
     });
@@ -165,23 +165,23 @@ export class PoolRewards {
         const from = e.args.from.toLowerCase();
         const eventValue = toBigInt(e.args.value);
         if (from === ADDRESS_0X0) {
-          totalSupply = totalSupply + eventValue;
+          totalSupply = totalSupply + toBigInt(e.args.value);
           totalSupplyRange.addValue(e.blockNumber, totalSupply);
         } else {
-          balances[from] = balances[from] - eventValue;
+          balances[from] = balances[from] - toBigInt(e.args.value);
           balancesRange[from].addValue(e.blockNumber, balances[from]);
         }
 
         const to = e.args.to.toLowerCase();
         if (to === ADDRESS_0X0) {
-          totalSupply = totalSupply - eventValue;
+          totalSupply = totalSupply - toBigInt(e.args.value);
           totalSupplyRange.addValue(e.blockNumber, totalSupply);
         } else {
-          if (!balances[to]) {
+          if (balances[to] === undefined) {
             balances[to] = 0n;
             balancesRange[to] = new RangedValue();
           }
-          balances[to] = balances[to] + eventValue;
+          balances[to] = balances[to] + toBigInt(e.args.value);
           balancesRange[to].addValue(e.blockNumber, balances[to]);
         }
       });

@@ -31,7 +31,7 @@ export class RangedValue {
     for (let index of [...this._keys].reverse()) {
       if (at >= index) {
         const value = this.data.get(index);
-        if (!value)
+        if (value === undefined)
           throw new Error(`Unexpectedly cant find a value with index ${index}`);
         return value;
       }
