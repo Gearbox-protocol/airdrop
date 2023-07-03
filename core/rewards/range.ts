@@ -1,9 +1,7 @@
-import { BigNumber } from "ethers";
-
 interface RangedValuesProps {
   keys: Array<number>;
-  data: Array<[number, BigNumber]>;
-  initialValue: BigNumber;
+  data: Array<[number, bigint]>;
+  initialValue: bigint;
 }
 
 interface ParsedRangedValuesProps {
@@ -13,31 +11,27 @@ interface ParsedRangedValuesProps {
 }
 
 export class RangedValue {
-  protected initialValue: BigNumber;
-  protected data: Map<number, BigNumber> = new Map();
+  protected initialValue: bigint;
+  protected data: Map<number, bigint> = new Map();
   protected _keys: Array<number> = [];
 
   constructor(props?: Partial<RangedValuesProps>) {
-    const {
-      initialValue = BigNumber.from(0),
-      data = [],
-      keys = [],
-    } = props || {};
+    const { initialValue = 0n, data = [], keys = [] } = props || {};
 
     this.initialValue = initialValue;
     this.data = new Map(data);
     this._keys = keys;
   }
-  addValue(from: number, value: BigNumber) {
+  addValue(from: number, value: bigint) {
     this.data.set(from, value);
     this._keys = [...this._keys, from].sort((a, b) => (a > b ? 1 : -1));
   }
 
-  getValue(at: number): BigNumber {
+  getValue(at: number): bigint {
     for (let index of [...this._keys].reverse()) {
       if (at >= index) {
         const value = this.data.get(index);
-        if (!value)
+        if (value === undefined)
           throw new Error(`Unexpectedly cant find a value with index ${index}`);
         return value;
       }
@@ -46,10 +40,10 @@ export class RangedValue {
     return this.initialValue;
   }
 
-  getValues(sortedKeys: Array<number>): Array<BigNumber> {
+  getValues(sortedKeys: Array<number>): Array<bigint> {
     const lastElm = this._keys.length - 1;
     let ownKeyIndex = lastElm;
-    const result: Array<BigNumber> = [];
+    const result: Array<bigint> = [];
     for (let sk of [...sortedKeys].reverse()) {
       if (sk < this._keys[0]) {
         result.push(this.initialValue);
@@ -69,7 +63,7 @@ export class RangedValue {
 
   protected getMapValue(index: number) {
     const value = this.data.get(index);
-    if (!value) {
+    if (value === undefined) {
       if (this.data.size > 0) {
         throw new Error(`Can get value for ${index}`);
       } else {
@@ -89,11 +83,8 @@ export class RangedValue {
     const parsedObject: ParsedRangedValuesProps = JSON.parse(jsonString);
     const transformed: RangedValuesProps = {
       ...parsedObject,
-      initialValue: BigNumber.from(parsedObject.initialValue),
-      data: parsedObject.data.map(([key, value]) => [
-        key,
-        BigNumber.from(value),
-      ]),
+      initialValue: BigInt(parsedObject.initialValue),
+      data: parsedObject.data.map(([key, value]) => [key, BigInt(value)]),
     };
 
     return new RangedValue(transformed);

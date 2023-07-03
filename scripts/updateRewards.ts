@@ -1,6 +1,5 @@
-import { detectNetwork, WAD } from "@gearbox-protocol/sdk";
+import { detectNetwork, toBigInt, WAD } from "@gearbox-protocol/sdk";
 import * as dotenv from "dotenv";
-import { BigNumber } from "ethers";
 import * as fs from "fs";
 import { ethers } from "hardhat";
 
@@ -22,7 +21,7 @@ import { mapToClaimed } from "./lib";
 import { loadPrevMerkle } from "./prevMerkle";
 
 export async function updatePoolRewards() {
-  const distributed: Record<string, BigNumber> = {};
+  const distributed: Record<string, bigint> = {};
 
   const accounts = await ethers.getSigners();
   const deployer = accounts[0];
@@ -102,23 +101,25 @@ export async function updatePoolRewards() {
 
   console.log("");
 
-  const lastBlock = await deployer.provider!.getBlockNumber();
+  const lastBlock = 17612819;
 
-  const balance = await gearToken.balanceOf(AIRDROP_DISTRIBUTOR, {
+  const b = await gearToken.balanceOf(AIRDROP_DISTRIBUTOR, {
     blockTag: lastBlock,
   });
+  const balance = toBigInt(b);
 
   const claimed: Array<ClaimedEvent> = await queryClaimed(
     distributor,
     lastBlock,
   );
 
-  let totalClaimedFromContract = BigNumber.from(0);
+  let totalClaimedFromContract = 0n;
 
   claimed.forEach(e => {
     exportCsv.addClaimed(e.args.account, e.args.amount.div(WAD).toNumber());
     if (!e.args.historic) {
-      totalClaimedFromContract = totalClaimedFromContract.add(e.args.amount);
+      totalClaimedFromContract =
+        totalClaimedFromContract + toBigInt(e.args.amount);
     }
   });
 
@@ -133,26 +134,26 @@ export async function updatePoolRewards() {
     const distributedFrom = distributed[from];
 
     if (distributedFrom) {
-      const distributedTo = distributed[to] || BigNumber.from(0);
+      const distributedTo = distributed[to] || 0n;
 
-      distributed[to] = distributedFrom.add(distributedTo);
+      distributed[to] = distributedFrom + distributedTo;
       delete distributed[from];
     }
     exportCsv.redirectRewards(from, to);
   });
 
   const distributorInfo = parseBalanceMap(
-    mapToClaimed(distributed).filter(e => !e.amount.isZero()),
+    mapToClaimed(distributed).filter(e => e.amount !== 0n),
   );
 
-  const totalNeeded = BigNumber.from(distributorInfo.tokenTotal);
-  const diff = totalNeeded.sub(totalClaimedFromContract).sub(balance);
+  const totalNeeded = BigInt(distributorInfo.tokenTotal);
+  const diff = totalNeeded - totalClaimedFromContract - balance;
 
   console.log(
     `Total distributed: ${formatGear(
       totalNeeded,
     )}, diff with existing merkle ${formatGear(
-      totalNeeded.sub(prevMerkle.tokenTotal),
+      totalNeeded - toBigInt(prevMerkle.tokenTotal),
     )}`,
   );
   console.log(`Total claimed: ${formatGear(totalClaimedFromContract)}`);

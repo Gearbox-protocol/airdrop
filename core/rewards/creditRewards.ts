@@ -2,6 +2,7 @@ import {
   ICreditConfigurator__factory,
   ICreditFacade__factory,
   ICreditManagerV2__factory,
+  toBigInt,
 } from "@gearbox-protocol/sdk";
 import {
   CloseCreditAccountEvent,
@@ -10,7 +11,7 @@ import {
   TransferAccountEvent,
 } from "@gearbox-protocol/sdk/lib/types/@gearbox-protocol/core-v2/contracts/interfaces/ICreditFacade.sol/ICreditFacade";
 import { TypedEvent } from "@gearbox-protocol/sdk/lib/types/common";
-import { BigNumber, providers } from "ethers";
+import { providers } from "ethers";
 
 import { creditRewardsPerBlock } from "./creditRewardParams";
 import { Reward } from "./poolRewards";
@@ -23,7 +24,7 @@ export class CreditRewards {
     address: string,
     provider: providers.Provider,
     toBlock?: number,
-  ): Promise<BigNumber> {
+  ): Promise<bigint> {
     const rewards = await CreditRewards.computeAllRewards(
       creditManager,
       provider,
@@ -32,7 +33,7 @@ export class CreditRewards {
 
     const addressLC = address.toLowerCase();
     const rewardFound = rewards.find(r => r.address === addressLC);
-    const reward = !rewardFound ? BigNumber.from(0) : rewardFound.amount;
+    const reward = !rewardFound ? 0n : rewardFound.amount;
 
     return reward;
   }
@@ -60,8 +61,8 @@ export class CreditRewards {
     parsed: {
       borrowedRange: Record<string, RangedValue>;
       totalBorrowedRange: RangedValue;
-      borrowed: Record<string, BigNumber>;
-      totalBorrowed: BigNumber;
+      borrowed: Record<string, bigint>;
+      totalBorrowed: bigint;
     },
     rewardPerBlock: RangedValue,
     toBlock: number,
@@ -83,8 +84,8 @@ export class CreditRewards {
     const borrowedRange: Record<string, RangedValue> = {};
     const totalBorrowedRange = new RangedValue();
 
-    const borrowed: Record<string, BigNumber> = {};
-    let totalBorrowed = BigNumber.from(0);
+    const borrowed: Record<string, bigint> = {};
+    let totalBorrowed = 0n;
 
     const cfi = ICreditFacade__factory.createInterface();
 
@@ -92,10 +93,11 @@ export class CreditRewards {
       const event = cfi.parseLog(e);
       switch (e.topics[0]) {
         case cfi.getEventTopic("OpenCreditAccount"): {
-          const { onBehalfOf, borrowAmount } = (
+          const { onBehalfOf, borrowAmount: ba } = (
             event as unknown as OpenCreditAccountEvent
           ).args;
-          totalBorrowed = totalBorrowed.add(borrowAmount);
+          const borrowAmount = toBigInt(ba);
+          totalBorrowed = totalBorrowed + borrowAmount;
           totalBorrowedRange.addValue(e.blockNumber, totalBorrowed);
 
           borrowed[onBehalfOf] = borrowAmount;
@@ -112,32 +114,34 @@ export class CreditRewards {
           // We need { borrower} only so, we can use any event to get it from args
           const { borrower } = (event as unknown as CloseCreditAccountEvent)
             .args;
-          totalBorrowed = totalBorrowed.sub(borrowed[borrower]);
+          totalBorrowed = totalBorrowed - borrowed[borrower];
           totalBorrowedRange.addValue(e.blockNumber, totalBorrowed);
 
-          borrowed[borrower] = BigNumber.from(0);
-          borrowedRange[borrower].addValue(e.blockNumber, BigNumber.from(0));
+          borrowed[borrower] = 0n;
+          borrowedRange[borrower].addValue(e.blockNumber, 0n);
           break;
         }
         case cfi.getEventTopic("IncreaseBorrowedAmount"): {
-          const { borrower, amount } = (
+          const { borrower, amount: a } = (
             event as unknown as IncreaseBorrowedAmountEvent
           ).args;
-          totalBorrowed = totalBorrowed.add(amount);
+          const amount = toBigInt(a);
+          totalBorrowed = totalBorrowed + amount;
           totalBorrowedRange.addValue(e.blockNumber, totalBorrowed);
 
-          borrowed[borrower] = borrowed[borrower].add(amount);
+          borrowed[borrower] = borrowed[borrower] + amount;
           borrowedRange[borrower].addValue(e.blockNumber, borrowed[borrower]);
           break;
         }
         case cfi.getEventTopic("DecreaseBorrowedAmount"): {
-          const { borrower, amount } = (
+          const { borrower, amount: a } = (
             event as unknown as IncreaseBorrowedAmountEvent
           ).args;
-          totalBorrowed = totalBorrowed.sub(amount);
+          const amount = toBigInt(a);
+          totalBorrowed = totalBorrowed - amount;
           totalBorrowedRange.addValue(e.blockNumber, totalBorrowed);
 
-          borrowed[borrower] = borrowed[borrower].sub(amount);
+          borrowed[borrower] = borrowed[borrower] - amount;
           borrowedRange[borrower].addValue(e.blockNumber, borrowed[borrower]);
           break;
         }
@@ -151,9 +155,9 @@ export class CreditRewards {
             borrowedRange[newOwner] = new RangedValue();
           }
 
-          borrowed[oldOwner] = BigNumber.from(0);
+          borrowed[oldOwner] = 0n;
           borrowedRange[newOwner].addValue(e.blockNumber, borrowed[newOwner]);
-          borrowedRange[oldOwner].addValue(e.blockNumber, BigNumber.from(0));
+          borrowedRange[oldOwner].addValue(e.blockNumber, 0n);
           break;
         }
       }
@@ -190,7 +194,7 @@ export class CreditRewards {
     balance: RangedValue,
     totalSupply: RangedValue,
     rewardPerBlock: RangedValue,
-  ): BigNumber {
+  ): bigint {
     const keys = Array.from(
       new Set([
         ...balance.keys,
@@ -200,7 +204,7 @@ export class CreditRewards {
       ]),
     ).sort((a, b) => (a > b ? 1 : -1));
 
-    let total = BigNumber.from(0);
+    let total = 0n;
 
     const balancesArr = balance.getValues(keys);
     const totalSupplyArr = totalSupply.getValues(keys);
@@ -209,13 +213,11 @@ export class CreditRewards {
     for (let i = 0; i < keys.length; i++) {
       const curBlock = keys[i];
       const nextBlock = i === keys.length - 1 ? toBlock : keys[i + 1];
-      if (!totalSupplyArr[i].isZero() && curBlock <= nextBlock) {
-        total = total.add(
-          balancesArr[i]
-            .mul(nextBlock - curBlock)
-            .mul(rewardsArr[i])
-            .div(totalSupplyArr[i]),
-        );
+      if (totalSupplyArr[i] !== 0n && curBlock <= nextBlock) {
+        total =
+          total +
+          (balancesArr[i] * BigInt(nextBlock - curBlock) * rewardsArr[i]) /
+            totalSupplyArr[i];
       }
     }
 

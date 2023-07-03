@@ -1,10 +1,5 @@
-import {
-  NetworkType,
-  SupportedToken,
-  tokenDataByNetwork,
-  WAD,
-} from "@gearbox-protocol/sdk";
-import { BigNumber, Signer } from "ethers";
+import { NetworkType, tokenDataByNetwork, WAD } from "@gearbox-protocol/sdk";
+import { Signer } from "ethers";
 
 import { CSVExport } from "../../core/csv/csvExport";
 import {
@@ -15,7 +10,7 @@ import { formatGear } from "../../core/utils/formatter";
 
 export async function computePools(
   exportCsv: CSVExport,
-  distributed: Record<string, BigNumber>,
+  distributed: Record<string, bigint>,
   network: NetworkType,
   toBlock: number,
   prevBlock: number,
@@ -23,7 +18,7 @@ export async function computePools(
 ) {
   for (const dToken of POOL_REWARDS_DIESEL_TOKENS) {
     try {
-      let total = BigNumber.from(0);
+      let total = 0n;
       const poolRewards = await PoolRewards.computeAllRewards(
         tokenDataByNetwork[network][dToken],
         deployer.provider!,
@@ -39,27 +34,26 @@ export async function computePools(
       );
 
       poolRewards.forEach(reward => {
-        distributed[reward.address] = (
-          distributed[reward.address] || BigNumber.from(0)
-        ).add(reward.amount);
+        distributed[reward.address] =
+          (distributed[reward.address] || 0n) + reward.amount;
 
         exportCsv.additem(
           reward.address,
           `Pool ${dToken}`,
-          reward.amount.div(WAD).toNumber(),
+          Number(reward.amount / WAD),
         );
 
-        total = total.add(reward.amount);
+        total = total + reward.amount;
       });
 
       const prevTotalRewards = prevPoolRewards.reduce(
-        (a, b) => a.add(b.amount),
-        BigNumber.from(0),
+        (a, b) => a + b.amount,
+        0n,
       );
 
       console.log(
         `Pool rewards for ${dToken}: ${formatGear(total)}, diff: ${formatGear(
-          total.sub(prevTotalRewards),
+          total - prevTotalRewards,
         )}`,
       );
     } catch (e) {

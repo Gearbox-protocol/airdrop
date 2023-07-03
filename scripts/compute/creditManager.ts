@@ -14,7 +14,7 @@ import {
   NetworkType,
   WAD,
 } from "@gearbox-protocol/sdk";
-import { BigNumber, Signer } from "ethers";
+import { Signer } from "ethers";
 
 import { CSVExport } from "../../core/csv/csvExport";
 import { CreditRewards } from "../../core/rewards/creditRewards";
@@ -41,7 +41,7 @@ function getRewardCMs(network: NetworkType) {
 
 export async function computeCreditManagers(
   exportCsv: CSVExport,
-  distributed: Record<string, BigNumber>,
+  distributed: Record<string, bigint>,
   network: NetworkType,
   toBlock: number,
   prevBlock: number,
@@ -50,7 +50,7 @@ export async function computeCreditManagers(
   const cms = getRewardCMs(network);
 
   for (const cm of cms) {
-    let total = BigNumber.from(0);
+    let total = 0n;
     const creditRewards = await CreditRewards.computeAllRewards(
       cm,
       deployer.provider!,
@@ -64,28 +64,27 @@ export async function computeCreditManagers(
     );
 
     creditRewards.forEach(reward => {
-      distributed[reward.address] = (
-        distributed[reward.address] || BigNumber.from(0)
-      ).add(reward.amount);
+      distributed[reward.address] =
+        (distributed[reward.address] || 0n) + reward.amount;
 
-      total = total.add(reward.amount);
+      total = total + reward.amount;
 
       exportCsv.additem(
         reward.address,
         `CM ${deployedContracts[cm]}`,
-        reward.amount.div(WAD).toNumber(),
+        Number(reward.amount / WAD),
       );
     });
 
     const prevTotalRewards = prevCreditRewards.reduce(
-      (a, b) => a.add(b.amount),
-      BigNumber.from(0),
+      (a, b) => a + b.amount,
+      0n,
     );
 
     console.log(
       `Credit manager rewards for ${deployedContracts[cm]}: ${formatGear(
         total,
-      )}, diff ${formatGear(total.sub(prevTotalRewards))}`,
+      )}, diff ${formatGear(total - prevTotalRewards)}`,
     );
   }
 }

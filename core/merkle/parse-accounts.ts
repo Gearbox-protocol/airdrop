@@ -1,5 +1,6 @@
-import { BigNumber, BigNumberish, utils } from "ethers";
+import { BigNumberish, utils } from "ethers";
 import BalanceTree from "./balance-tree";
+import { BigIntMath, toBigInt } from "@gearbox-protocol/sdk";
 
 const { isAddress, getAddress } = utils;
 
@@ -23,11 +24,11 @@ export interface RewardsDistributorInfo {
 export type ClaimableBalance = { address: string; amount: BigNumberish };
 
 export function parseBalanceMap(
-  balances: ClaimableBalance[]
+  balances: ClaimableBalance[],
 ): RewardsDistributorInfo {
   const dataByAddress = balances.reduce<{
     [address: string]: {
-      amount: BigNumber;
+      amount: bigint;
       flags?: { [flag: string]: boolean };
     };
   }>((memo, { address: account, amount: earnings }) => {
@@ -36,8 +37,8 @@ export function parseBalanceMap(
     }
     const parsed = getAddress(account);
     if (memo[parsed]) throw new Error(`Duplicate address: ${parsed}`);
-    const parsedNum = BigNumber.from(earnings);
-    if (parsedNum.lte(0))
+    const parsedNum = toBigInt(earnings);
+    if (parsedNum <= 0)
       throw new Error(`Invalid amount for account: ${account}`);
 
     memo[parsed] = { amount: parsedNum };
@@ -48,10 +49,10 @@ export function parseBalanceMap(
 
   // construct a tree
   const tree = new BalanceTree(
-    sortedAddresses.map((address) => ({
+    sortedAddresses.map(address => ({
       account: address,
       amount: dataByAddress[address].amount,
-    }))
+    })),
   );
 
   // generate claims
@@ -61,21 +62,21 @@ export function parseBalanceMap(
     const { amount } = dataByAddress[address];
     memo[address] = {
       index,
-      amount: amount.toHexString(),
+      amount: BigIntMath.toHexString(amount),
       proof: tree.getProof(index, address, amount),
     };
     return memo;
   }, {});
 
-  const tokenTotal: BigNumber = sortedAddresses.reduce<BigNumber>(
-    (memo, key) => memo.add(dataByAddress[key].amount),
-    BigNumber.from(0)
+  const tokenTotal: bigint = sortedAddresses.reduce<bigint>(
+    (memo, key) => memo + dataByAddress[key].amount,
+    0n,
   );
 
   return {
     merkleRoot: tree.getHexRoot(),
     toBlock: 0,
-    tokenTotal: tokenTotal.toHexString(),
+    tokenTotal: BigIntMath.toHexString(tokenTotal),
     claims,
   };
 }

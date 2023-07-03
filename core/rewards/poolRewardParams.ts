@@ -1,5 +1,4 @@
 import { DieselTokenTypes, NetworkType } from "@gearbox-protocol/sdk";
-import { BigNumber } from "ethers";
 
 import { RangedValue } from "./range";
 
@@ -25,103 +24,101 @@ export const poolRewardsPerBlock: Record<
   },
 };
 
-export const GEAR_PER_BLOCK: Record<DieselTokenTypes, number> = {
-  dDAI: 2283,
-  dUSDC: 2283,
-  dWETH: 3196,
-  dWBTC: 913,
-  dwstETH: 1636,
-  dFRAX: 0,
+export const GEAR_PER_BLOCK: Record<DieselTokenTypes, bigint> = {
+  dDAI: 2283n,
+  dUSDC: 2283n,
+  dWETH: 3196n,
+  dWBTC: 913n,
+  dwstETH: 1636n,
+  dFRAX: 0n,
 };
 
-export const GEAR_PER_BLOCK_GIP30: Record<DieselTokenTypes, number> = {
-  dDAI: 2283,
-  dUSDC: 3101,
-  dWETH: 4014,
-  dWBTC: 457,
-  dwstETH: 0,
-  dFRAX: 641,
+export const GEAR_PER_BLOCK_GIP30: Record<DieselTokenTypes, bigint> = {
+  dDAI: 2283n,
+  dUSDC: 3101n,
+  dWETH: 4014n,
+  dWBTC: 457n,
+  dwstETH: 0n,
+  dFRAX: 641n,
 };
 
 const GOERLI_BLOCK = 7694030;
 
 poolRewardsPerBlock.Goerli.dDAI.addValue(
   GOERLI_BLOCK,
-  BigNumber.from(10).pow(18).mul(GEAR_PER_BLOCK.dDAI).div(100),
+  (10n ** 18n * GEAR_PER_BLOCK.dDAI) / 100n,
 );
 poolRewardsPerBlock.Goerli.dUSDC.addValue(
   GOERLI_BLOCK,
-  BigNumber.from(10).pow(18).mul(GEAR_PER_BLOCK.dUSDC).div(100),
+  (10n ** 18n * GEAR_PER_BLOCK.dUSDC) / 100n,
 );
 poolRewardsPerBlock.Goerli.dWETH.addValue(
   GOERLI_BLOCK,
-  BigNumber.from(10).pow(18).mul(GEAR_PER_BLOCK.dWETH).div(100),
+  (10n ** 18n * GEAR_PER_BLOCK.dWETH) / 100n,
 );
 poolRewardsPerBlock.Goerli.dWBTC.addValue(
   GOERLI_BLOCK,
-  BigNumber.from(10).pow(18).mul(GEAR_PER_BLOCK.dWBTC).div(100),
+  (10n ** 18n * GEAR_PER_BLOCK.dWBTC) / 100n,
 );
 poolRewardsPerBlock.Goerli.dwstETH.addValue(
   GOERLI_BLOCK,
-  BigNumber.from(10).pow(18).mul(GEAR_PER_BLOCK.dwstETH).div(100),
+  (10n ** 18n * GEAR_PER_BLOCK.dwstETH) / 100n,
 );
 
 const GOERLI_BLOCK_FRAX = 7694030;
 poolRewardsPerBlock.Goerli.dFRAX.addValue(
   GOERLI_BLOCK_FRAX,
-  BigNumber.from(10).pow(18).mul(GEAR_PER_BLOCK.dFRAX).div(100),
+  (10n ** 18n * GEAR_PER_BLOCK.dFRAX) / 100n,
 );
 
 const MAINNET_BLOCK = 15820000;
 
 poolRewardsPerBlock.Mainnet.dDAI.addValue(
   MAINNET_BLOCK,
-  BigNumber.from(10).pow(18).mul(GEAR_PER_BLOCK.dDAI).div(100),
+  (10n ** 18n * GEAR_PER_BLOCK.dDAI) / 100n,
 );
 poolRewardsPerBlock.Mainnet.dUSDC.addValue(
   MAINNET_BLOCK,
-  BigNumber.from(10).pow(18).mul(GEAR_PER_BLOCK.dUSDC).div(100),
+  (10n ** 18n * GEAR_PER_BLOCK.dUSDC) / 100n,
 );
 poolRewardsPerBlock.Mainnet.dWETH.addValue(
   MAINNET_BLOCK,
-  BigNumber.from(10).pow(18).mul(GEAR_PER_BLOCK.dWETH).div(100),
+  (10n ** 18n * GEAR_PER_BLOCK.dWETH) / 100n,
 );
 poolRewardsPerBlock.Mainnet.dWBTC.addValue(
   MAINNET_BLOCK,
-  BigNumber.from(10).pow(18).mul(GEAR_PER_BLOCK.dWBTC).div(100),
+  (10n ** 18n * GEAR_PER_BLOCK.dWBTC) / 100n,
 );
 poolRewardsPerBlock.Mainnet.dwstETH.addValue(
   MAINNET_BLOCK,
-  BigNumber.from(10).pow(18).mul(GEAR_PER_BLOCK.dwstETH).div(100),
+  (10n ** 18n * GEAR_PER_BLOCK.dwstETH) / 100n,
 );
-
-// poolRewardsPerBlock.Goerli.dDAI.addValue(90000, BigNumber.from(0));
 
 const MAINNET_BLOCK_GIP30 = 15977000;
 
 poolRewardsPerBlock.Mainnet.dDAI.addValue(
   MAINNET_BLOCK_GIP30,
-  BigNumber.from(10).pow(18).mul(GEAR_PER_BLOCK_GIP30.dDAI).div(100),
+  (10n ** 18n * GEAR_PER_BLOCK_GIP30.dDAI) / 100n,
 );
 poolRewardsPerBlock.Mainnet.dUSDC.addValue(
   MAINNET_BLOCK_GIP30,
-  BigNumber.from(10).pow(18).mul(GEAR_PER_BLOCK_GIP30.dUSDC).div(100),
+  (10n ** 18n * GEAR_PER_BLOCK_GIP30.dUSDC) / 100n,
 );
 poolRewardsPerBlock.Mainnet.dWETH.addValue(
   MAINNET_BLOCK_GIP30,
-  BigNumber.from(10).pow(18).mul(GEAR_PER_BLOCK_GIP30.dWETH).div(100),
+  (10n ** 18n * GEAR_PER_BLOCK_GIP30.dWETH) / 100n,
 );
 poolRewardsPerBlock.Mainnet.dWBTC.addValue(
   MAINNET_BLOCK_GIP30,
-  BigNumber.from(10).pow(18).mul(GEAR_PER_BLOCK_GIP30.dWBTC).div(100),
+  (10n ** 18n * GEAR_PER_BLOCK_GIP30.dWBTC) / 100n,
 );
 poolRewardsPerBlock.Mainnet.dwstETH.addValue(
   MAINNET_BLOCK_GIP30,
-  BigNumber.from(10).pow(18).mul(GEAR_PER_BLOCK_GIP30.dwstETH).div(100),
+  (10n ** 18n * GEAR_PER_BLOCK_GIP30.dwstETH) / 100n,
 );
 
 const MAINNET_BLOCK_FRAX = 16720000;
 poolRewardsPerBlock.Mainnet.dFRAX.addValue(
   MAINNET_BLOCK_FRAX,
-  BigNumber.from(10).pow(18).mul(GEAR_PER_BLOCK_GIP30.dFRAX).div(100),
+  (10n ** 18n * GEAR_PER_BLOCK_GIP30.dFRAX) / 100n,
 );
