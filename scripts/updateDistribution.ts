@@ -1,7 +1,6 @@
 import { detectNetwork, waitForTransaction } from "@gearbox-protocol/devops";
 import { getNetworkType } from "@gearbox-protocol/sdk";
 import * as dotenv from "dotenv";
-import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
 import { Logger } from "tslog";
 
@@ -12,8 +11,8 @@ import { DistributionDataStruct } from "../types/contracts/AirdropDistributor";
 const campaign = earlyGearLPs;
 
 const fee = {
-  maxFeePerGas: BigNumber.from(233e9),
-  maxPriorityFeePerGas: BigNumber.from(5e9),
+  maxFeePerGas: BigInt(233e9),
+  maxPriorityFeePerGas: BigInt(5e9),
 };
 
 function cutIntoChuncks<T>(
@@ -59,7 +58,7 @@ async function updateDistributor() {
   const events: Array<DistributionDataStruct> = [];
 
   campaign.distributed.forEach(data => {
-    const amount = BigNumber.from(10).pow(18).mul(data.amount);
+    const amount = 10n ** 18n * BigInt(data.amount);
     const account = data.address.toLowerCase();
 
     events.push({

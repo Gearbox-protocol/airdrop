@@ -1,7 +1,6 @@
 import { detectNetwork, waitForTransaction } from "@gearbox-protocol/devops";
 import { getNetworkType } from "@gearbox-protocol/sdk";
 import * as dotenv from "dotenv";
-import { BigNumber } from "ethers";
 import * as fs from "fs";
 import { ethers } from "hardhat";
 import { Logger } from "tslog";
@@ -19,8 +18,8 @@ interface InitialClaim {
 }
 
 const fee = {
-  maxFeePerGas: BigNumber.from(233e9),
-  maxPriorityFeePerGas: BigNumber.from(23e9),
+  maxFeePerGas: BigInt(233e9),
+  maxPriorityFeePerGas: BigInt(23e9),
 };
 
 function cutIntoChuncks<T>(
@@ -37,18 +36,16 @@ function cutIntoChuncks<T>(
 }
 
 export function getInitialSetup(): InitialClaim {
-  const distributed: Record<string, BigNumber> = {};
-  const claimed: Record<string, BigNumber> = {};
+  const distributed: Record<string, bigint> = {};
+  const claimed: Record<string, bigint> = {};
   const events: Array<DistributionDataStruct> = [];
 
   for (const c of campaigns) {
     c.distributed.forEach(data => {
-      const amount = BigNumber.from(10).pow(18).mul(data.amount);
+      const amount = 10n ** 18n * BigInt(data.amount);
       const account = data.address.toLowerCase();
 
-      distributed[account] = (distributed[account] || BigNumber.from(0)).add(
-        amount,
-      );
+      distributed[account] = (distributed[account] || 0n) + amount;
       events.push({
         account,
         campaignId: c.campaign,
@@ -57,18 +54,16 @@ export function getInitialSetup(): InitialClaim {
     });
 
     c.claimed.forEach(data => {
-      const amount = BigNumber.from(10).pow(18).mul(data.amount);
+      const amount = 10n ** 18n * BigInt(data.amount);
       const account = data.address.toLowerCase();
 
-      claimed[account] = (claimed[account] || BigNumber.from(0)).add(amount);
-      distributed[account] = (distributed[account] || BigNumber.from(0)).sub(
-        amount,
-      );
+      claimed[account] = (claimed[account] || 0n) + amount;
+      distributed[account] = (distributed[account] || 0n) - amount;
     });
   }
 
   const result: InitialClaim = {
-    distributed: mapToClaimed(distributed).filter(e => !e.amount.isZero()),
+    distributed: mapToClaimed(distributed).filter(e => e.amount !== 0n),
     claimed: mapToClaimed(claimed),
     events,
   };

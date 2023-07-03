@@ -4,7 +4,6 @@ import {
   DUMB_ADDRESS3,
 } from "@gearbox-protocol/sdk";
 import { expect } from "chai";
-import { BigNumber } from "ethers";
 
 import { TypedEvent } from "../../types/common";
 import { CreditRewards } from "./creditRewards";
@@ -23,11 +22,11 @@ describe("CreditRewards test", () => {
     const cfacade = DUMB_ADDRESS;
     const user = DUMB_ADDRESS2.toLowerCase();
     const events = [
-      openCreditAccountEvent(cfacade, 1000, user, BigNumber.from(100)),
+      openCreditAccountEvent(cfacade, 1000, user, 100n),
     ] as Array<TypedEvent>;
 
     const rewardPerBlock = new RangedValue();
-    rewardPerBlock.addValue(1000, BigNumber.from(1000));
+    rewardPerBlock.addValue(1000, 1000n);
     const r = CreditRewards.formatEvents(
       CreditRewards.parseCMEvents(events),
       rewardPerBlock,
@@ -37,7 +36,7 @@ describe("CreditRewards test", () => {
     expect(r).to.be.eql([
       {
         address: user,
-        amount: BigNumber.from(1000).mul(1000),
+        amount: 1000n * 1000n,
       },
     ]);
   });
@@ -46,12 +45,12 @@ describe("CreditRewards test", () => {
     const cfacade = DUMB_ADDRESS;
     const user = DUMB_ADDRESS2.toLowerCase();
     const events = [
-      openCreditAccountEvent(cfacade, 1000, user, BigNumber.from(100)),
+      openCreditAccountEvent(cfacade, 1000, user, 100n),
       closeCreditAccountEvent(cfacade, 1500, user),
     ] as Array<TypedEvent>;
 
     const rewardPerBlock = new RangedValue();
-    rewardPerBlock.addValue(1000, BigNumber.from(1000));
+    rewardPerBlock.addValue(1000, 1000n);
     const r = CreditRewards.formatEvents(
       CreditRewards.parseCMEvents(events),
       rewardPerBlock,
@@ -61,7 +60,7 @@ describe("CreditRewards test", () => {
     expect(r).to.be.eql([
       {
         address: user,
-        amount: BigNumber.from(1000).mul(500),
+        amount: 1000n * 500n,
       },
     ]);
   });
@@ -71,13 +70,13 @@ describe("CreditRewards test", () => {
     const user = DUMB_ADDRESS2.toLowerCase();
     const user2 = DUMB_ADDRESS3.toLowerCase();
     const events = [
-      openCreditAccountEvent(cfacade, 1000, user, BigNumber.from(100)),
+      openCreditAccountEvent(cfacade, 1000, user, 100n),
       liquidateCreditAccountEvent(cfacade, 1500, user),
-      openCreditAccountEvent(cfacade, 1500, user2, BigNumber.from(200)),
+      openCreditAccountEvent(cfacade, 1500, user2, 200n),
     ] as Array<TypedEvent>;
 
     const rewardPerBlock = new RangedValue();
-    rewardPerBlock.addValue(1000, BigNumber.from(1000));
+    rewardPerBlock.addValue(1000, 1000n);
     const r = CreditRewards.formatEvents(
       CreditRewards.parseCMEvents(events),
       rewardPerBlock,
@@ -87,11 +86,11 @@ describe("CreditRewards test", () => {
     expect(r).to.be.eql([
       {
         address: user,
-        amount: BigNumber.from(1000).mul(500),
+        amount: 1000n * 500n,
       },
       {
         address: user2,
-        amount: BigNumber.from(1000).mul(500),
+        amount: 1000n * 500n,
       },
     ]);
   });
@@ -101,13 +100,13 @@ describe("CreditRewards test", () => {
     const user = DUMB_ADDRESS2.toLowerCase();
     const user2 = DUMB_ADDRESS3.toLowerCase();
     const events = [
-      openCreditAccountEvent(cfacade, 1000, user, BigNumber.from(100)),
-      openCreditAccountEvent(cfacade, 1000, user2, BigNumber.from(100)),
-      increaseBorrowedAmountEvent(cfacade, 1500, user2, BigNumber.from(200)),
+      openCreditAccountEvent(cfacade, 1000, user, 100n),
+      openCreditAccountEvent(cfacade, 1000, user2, 100n),
+      increaseBorrowedAmountEvent(cfacade, 1500, user2, 200n),
     ] as Array<TypedEvent>;
 
     const rewardPerBlock = new RangedValue();
-    rewardPerBlock.addValue(1000, BigNumber.from(1000));
+    rewardPerBlock.addValue(1000, 1000n);
     const r = CreditRewards.formatEvents(
       CreditRewards.parseCMEvents(events),
       rewardPerBlock,
@@ -117,11 +116,11 @@ describe("CreditRewards test", () => {
     expect(r).to.be.eql([
       {
         address: user,
-        amount: BigNumber.from(500).mul(500).add(BigNumber.from(250).mul(500)),
+        amount: 500n * 500n + 250n * 500n,
       },
       {
         address: user2,
-        amount: BigNumber.from(500).mul(500).add(BigNumber.from(750).mul(500)),
+        amount: 500n * 500n + 750n * 500n,
       },
     ]);
   });
@@ -131,14 +130,14 @@ describe("CreditRewards test", () => {
     const user = DUMB_ADDRESS2.toLowerCase();
     const user2 = DUMB_ADDRESS3.toLowerCase();
     const events = [
-      openCreditAccountEvent(cfacade, 1000, user, BigNumber.from(200)),
-      openCreditAccountEvent(cfacade, 1000, user2, BigNumber.from(200)),
-      decreaseBorrowedAmountEvent(cfacade, 1500, user, BigNumber.from(100)),
-      increaseBorrowedAmountEvent(cfacade, 1500, user2, BigNumber.from(100)),
+      openCreditAccountEvent(cfacade, 1000, user, 200n),
+      openCreditAccountEvent(cfacade, 1000, user2, 200n),
+      decreaseBorrowedAmountEvent(cfacade, 1500, user, 100n),
+      increaseBorrowedAmountEvent(cfacade, 1500, user2, 100n),
     ] as Array<TypedEvent>;
 
     const rewardPerBlock = new RangedValue();
-    rewardPerBlock.addValue(1000, BigNumber.from(1000));
+    rewardPerBlock.addValue(1000, 1000n);
     const r = CreditRewards.formatEvents(
       CreditRewards.parseCMEvents(events),
       rewardPerBlock,
@@ -148,11 +147,11 @@ describe("CreditRewards test", () => {
     expect(r).to.be.eql([
       {
         address: user,
-        amount: BigNumber.from(500).mul(500).add(BigNumber.from(250).mul(500)),
+        amount: 500n * 500n + 250n * 500n,
       },
       {
         address: user2,
-        amount: BigNumber.from(500).mul(500).add(BigNumber.from(750).mul(500)),
+        amount: 500n * 500n + 750n * 500n,
       },
     ]);
   });
@@ -162,12 +161,12 @@ describe("CreditRewards test", () => {
     const user = DUMB_ADDRESS2.toLowerCase();
     const user2 = DUMB_ADDRESS3.toLowerCase();
     const events = [
-      openCreditAccountEvent(cfacade, 1000, user, BigNumber.from(200)),
+      openCreditAccountEvent(cfacade, 1000, user, 200n),
       transferAccountEvent(cfacade, 1500, user, user2),
     ] as Array<TypedEvent>;
 
     const rewardPerBlock = new RangedValue();
-    rewardPerBlock.addValue(1000, BigNumber.from(1000));
+    rewardPerBlock.addValue(1000, 1000n);
     const r = CreditRewards.formatEvents(
       CreditRewards.parseCMEvents(events),
       rewardPerBlock,
@@ -177,11 +176,11 @@ describe("CreditRewards test", () => {
     expect(r).to.be.eql([
       {
         address: user,
-        amount: BigNumber.from(500).mul(1000),
+        amount: 500n * 1000n,
       },
       {
         address: user2,
-        amount: BigNumber.from(500).mul(1000),
+        amount: 500n * 1000n,
       },
     ]);
   });

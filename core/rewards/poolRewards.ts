@@ -4,10 +4,11 @@ import {
   IERC20__factory,
   NetworkType,
   SupportedToken,
+  toBigInt,
   tokenSymbolByAddress,
 } from "@gearbox-protocol/sdk";
 import { TransferEvent } from "@gearbox-protocol/sdk/lib/types/@openzeppelin/contracts/token/ERC20/IERC20";
-import { BigNumber, providers } from "ethers";
+import { providers } from "ethers";
 
 import { poolRewardsPerBlock } from "./poolRewardParams";
 import { RangedValue } from "./range";
@@ -24,7 +25,7 @@ export const POOL_REWARDS_DIESEL_TOKENS: Array<SupportedToken> = [
 
 export interface Reward {
   address: string;
-  amount: BigNumber;
+  amount: bigint;
 }
 
 export class PoolRewards {
@@ -34,7 +35,7 @@ export class PoolRewards {
     provider: providers.Provider,
     networkType: NetworkType,
     toBlock?: number,
-  ): Promise<BigNumber> {
+  ): Promise<bigint> {
     const toBlockQuery = toBlock || (await provider.getBlockNumber());
 
     const events = await PoolRewards.query(dieselToken, provider, toBlockQuery);
@@ -48,25 +49,26 @@ export class PoolRewards {
     const balanceRange = new RangedValue();
     const totalSupplyRange = new RangedValue();
 
-    let totalSupply = BigNumber.from(0);
-    let balance = BigNumber.from(0);
+    let totalSupply = 0n;
+    let balance = 0n;
 
     events.forEach(e => {
       const from = e.args.from.toLowerCase();
+      const eventValue = toBigInt(e.args.value);
       if (from === ADDRESS_0X0) {
-        totalSupply = totalSupply.add(e.args.value);
+        totalSupply = totalSupply + eventValue;
         totalSupplyRange.addValue(e.blockNumber, totalSupply);
       } else if (from === addrLC) {
-        balance = balance.sub(e.args.value);
+        balance = balance - eventValue;
         balanceRange.addValue(e.blockNumber, balance);
       }
 
       const to = e.args.to.toLowerCase();
       if (to === ADDRESS_0X0) {
-        totalSupply = totalSupply.sub(e.args.value);
+        totalSupply = totalSupply - eventValue;
         totalSupplyRange.addValue(e.blockNumber, totalSupply);
       } else if (to === addrLC) {
-        balance = balance.add(e.args.value);
+        balance = balance + eventValue;
         balanceRange.addValue(e.blockNumber, balance);
       }
     });
@@ -113,7 +115,7 @@ export class PoolRewards {
     balance: RangedValue,
     totalSupply: RangedValue,
     rewardPerBlock: RangedValue,
-  ): BigNumber {
+  ): bigint {
     const keys = Array.from(
       new Set([
         ...balance.keys,
@@ -123,7 +125,7 @@ export class PoolRewards {
       ]),
     ).sort((a, b) => (a > b ? 1 : -1));
 
-    let total = BigNumber.from(0);
+    let total = 0n;
 
     const balancesArr = balance.getValues(keys);
     const totalSupplyArr = totalSupply.getValues(keys);
@@ -133,13 +135,11 @@ export class PoolRewards {
       const curBlock = keys[i];
       const nextBlock = i === keys.length - 1 ? toBlock : keys[i + 1];
 
-      if (!totalSupplyArr[i].isZero() && curBlock <= nextBlock) {
-        total = total.add(
-          balancesArr[i]
-            .mul(nextBlock - curBlock)
-            .mul(rewardsArr[i])
-            .div(totalSupplyArr[i]),
-        );
+      if (totalSupplyArr[i] !== 0n && curBlock <= nextBlock) {
+        total =
+          total +
+          (balancesArr[i] * BigInt(nextBlock - curBlock) * rewardsArr[i]) /
+            totalSupplyArr[i];
       }
     }
 
@@ -156,31 +156,32 @@ export class PoolRewards {
     const totalSupplyRange = new RangedValue();
     const balancesRange: Record<string, RangedValue> = {};
 
-    let totalSupply = BigNumber.from(0);
-    let balances: Record<string, BigNumber> = {};
+    let totalSupply = 0n;
+    let balances: Record<string, bigint> = {};
 
     query
       .filter(e => !e.args.value.isZero())
       .forEach(e => {
         const from = e.args.from.toLowerCase();
+        const eventValue = toBigInt(e.args.value);
         if (from === ADDRESS_0X0) {
-          totalSupply = totalSupply.add(e.args.value);
+          totalSupply = totalSupply + eventValue;
           totalSupplyRange.addValue(e.blockNumber, totalSupply);
         } else {
-          balances[from] = balances[from].sub(e.args.value);
+          balances[from] = balances[from] - eventValue;
           balancesRange[from].addValue(e.blockNumber, balances[from]);
         }
 
         const to = e.args.to.toLowerCase();
         if (to === ADDRESS_0X0) {
-          totalSupply = totalSupply.sub(e.args.value);
+          totalSupply = totalSupply - eventValue;
           totalSupplyRange.addValue(e.blockNumber, totalSupply);
         } else {
           if (!balances[to]) {
-            balances[to] = BigNumber.from(0);
+            balances[to] = 0n;
             balancesRange[to] = new RangedValue();
           }
-          balances[to] = balances[to].add(e.args.value);
+          balances[to] = balances[to] + eventValue;
           balancesRange[to].addValue(e.blockNumber, balances[to]);
         }
       });

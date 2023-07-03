@@ -5,10 +5,9 @@
  */
 
 import { deploy, waitForTransaction } from "@gearbox-protocol/devops";
-import { WAD } from "@gearbox-protocol/sdk";
+import { toBigInt, WAD } from "@gearbox-protocol/sdk";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
-import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
 import { Suite } from "mocha";
 import { Logger } from "tslog";
@@ -68,13 +67,13 @@ describe("Airdrop distributor tests", function (this: Suite) {
     );
 
     const distributed: Array<ClaimableBalance> = [
-      { address: DUMB_ADDRESS, amount: WAD.mul(1500) },
-      { address: DUMB_ADDRESS2, amount: WAD.mul(2000) },
+      { address: DUMB_ADDRESS, amount: WAD * 1500n },
+      { address: DUMB_ADDRESS2, amount: WAD * 2000n },
     ];
 
     claimed = [
-      { address: DUMB_ADDRESS, amount: WAD.mul(500) },
-      { address: DUMB_ADDRESS2, amount: WAD.mul(200) },
+      { address: DUMB_ADDRESS, amount: WAD * 500n },
+      { address: DUMB_ADDRESS2, amount: WAD * 200n },
     ];
 
     [airdropDistributor, info] = await deployDistributor(
@@ -86,7 +85,7 @@ describe("Airdrop distributor tests", function (this: Suite) {
     );
 
     await waitForTransaction(
-      token.mint(airdropDistributor.address, WAD.mul(3500)),
+      token.mint(airdropDistributor.address, WAD * 3500n),
     );
   });
 
@@ -125,7 +124,7 @@ describe("Airdrop distributor tests", function (this: Suite) {
       airdropDistributor.claim(
         nodeInfo.index,
         DUMB_ADDRESS,
-        WAD.mul(1500),
+        WAD * 1500n,
         nodeInfo.proof,
       ),
     );
@@ -137,12 +136,12 @@ describe("Airdrop distributor tests", function (this: Suite) {
     );
 
     expect(event.account).to.be.eq(DUMB_ADDRESS);
-    expect(event.amount).to.be.eq(WAD.mul(1500));
+    expect(toBigInt(event.amount)).to.be.eq(WAD * 1500n);
 
-    expect(await token.balanceOf(DUMB_ADDRESS)).to.be.eq(WAD.mul(1500));
+    expect(toBigInt(await token.balanceOf(DUMB_ADDRESS))).to.be.eq(WAD * 1500n);
 
-    expect(await airdropDistributor.claimed(DUMB_ADDRESS)).to.be.eq(
-      WAD.mul(1500),
+    expect(toBigInt(await airdropDistributor.claimed(DUMB_ADDRESS))).to.be.eq(
+      WAD * 1500n,
     );
   });
 
@@ -153,7 +152,7 @@ describe("Airdrop distributor tests", function (this: Suite) {
       airdropDistributor.claim(
         nodeInfo.index,
         DUMB_ADDRESS,
-        WAD.mul(1001),
+        WAD * 1001n,
         nodeInfo.proof,
       ),
     ).to.be.revertedWith("MerkleDistributor: Invalid proof.");
@@ -165,7 +164,7 @@ describe("Airdrop distributor tests", function (this: Suite) {
     await airdropDistributor.claim(
       nodeInfo.index,
       DUMB_ADDRESS,
-      WAD.mul(1500),
+      WAD * 1500n,
       nodeInfo.proof,
     );
 
@@ -173,7 +172,7 @@ describe("Airdrop distributor tests", function (this: Suite) {
       airdropDistributor.claim(
         nodeInfo.index,
         DUMB_ADDRESS,
-        WAD.mul(1500),
+        WAD * 1500n,
         nodeInfo.proof,
       ),
     ).to.be.revertedWith("MerkleDistributor: Nothing to claim");
@@ -181,8 +180,8 @@ describe("Airdrop distributor tests", function (this: Suite) {
 
   it(`[AD-6]: updateMerkleRoot works correctly`, async () => {
     const recipients: Array<ClaimableBalance> = [
-      { address: DUMB_ADDRESS, amount: BigNumber.from(2000).mul(WAD) },
-      { address: DUMB_ADDRESS2, amount: BigNumber.from(2000).mul(WAD) },
+      { address: DUMB_ADDRESS, amount: 2000n * WAD },
+      { address: DUMB_ADDRESS2, amount: 2000n * WAD },
     ];
 
     const newInfo = parseBalanceMap(recipients);
@@ -210,14 +209,14 @@ describe("Airdrop distributor tests", function (this: Suite) {
       airdropDistributor.claim(
         nodeInfo.index,
         DUMB_ADDRESS,
-        WAD.mul(1500),
+        WAD * 1500n,
         nodeInfo.proof,
       ),
     );
 
     const recipients: Array<ClaimableBalance> = [
-      { address: DUMB_ADDRESS, amount: BigNumber.from(2000).mul(WAD) },
-      { address: DUMB_ADDRESS2, amount: BigNumber.from(2000).mul(WAD) },
+      { address: DUMB_ADDRESS, amount: 2000n * WAD },
+      { address: DUMB_ADDRESS2, amount: 2000n * WAD },
     ];
 
     const newInfo = parseBalanceMap(recipients);
@@ -232,22 +231,22 @@ describe("Airdrop distributor tests", function (this: Suite) {
       airdropDistributor.claim(
         nodeInfo.index,
         DUMB_ADDRESS,
-        WAD.mul(2000),
+        WAD * 2000n,
         nodeInfo.proof,
       ),
     );
 
-    expect(await token.balanceOf(DUMB_ADDRESS)).to.be.eq(WAD.mul(2000));
+    expect(await token.balanceOf(DUMB_ADDRESS)).to.be.eq(WAD * 2000n);
 
     expect(await airdropDistributor.claimed(DUMB_ADDRESS)).to.be.eq(
-      WAD.mul(2000),
+      WAD * 2000n,
     );
 
     await expect(
       airdropDistributor.claim(
         nodeInfo.index,
         DUMB_ADDRESS,
-        WAD.mul(2000),
+        WAD * 2000n,
         nodeInfo.proof,
       ),
     ).to.be.revertedWith("MerkleDistributor: Nothing to claim");
@@ -258,12 +257,12 @@ describe("Airdrop distributor tests", function (this: Suite) {
       {
         account: DUMB_ADDRESS,
         campaignId: 0,
-        amount: WAD.mul(1000),
+        amount: WAD * 1000n,
       },
       {
         account: DUMB_ADDRESS2,
         campaignId: 1,
-        amount: WAD.mul(2000),
+        amount: WAD * 2000n,
       },
     ];
 
