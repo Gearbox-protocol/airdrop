@@ -228,22 +228,29 @@ export class CreditRewards {
     toBlock: number,
   ) {
     const cm = ICreditManagerV2__factory.connect(creditManager, provider);
-    const cc = ICreditConfigurator__factory.connect(
-      await cm.creditConfigurator(),
-      provider,
-    );
+    // get all historical creditConfigurators for this cm
+    const ccAddrs = (
+      await cm.queryFilter(cm.filters.NewConfigurator(), undefined, toBlock)
+    ).map(e => e.args.newConfigurator);
 
-    const creditFacadesEvents = await cc.queryFilter(
-      cc.filters.CreditFacadeUpgraded(),
-      0,
-      toBlock,
-    );
+    // get all historical creditFacades for this cm
+    const cfAddrs = (
+      await Promise.all(
+        ccAddrs.map(async (ccAddr): Promise<string[]> => {
+          const cc = ICreditConfigurator__factory.connect(ccAddr, provider);
+          const cfUpgradedEvents = await cc.queryFilter(
+            cc.filters.CreditFacadeUpgraded(),
+            undefined,
+            toBlock,
+          );
+          return cfUpgradedEvents.map(e => e.args.newCreditFacade);
+        }),
+      )
+    ).flat();
 
     const events: Array<TypedEvent> = (
       await Promise.all(
-        creditFacadesEvents.map(cfe =>
-          CreditRewards.query(cfe.args.newCreditFacade, provider, toBlock),
-        ),
+        cfAddrs.map(addr => CreditRewards.query(addr, provider, toBlock)),
       )
     ).flat(1);
 
