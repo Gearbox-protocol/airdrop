@@ -664,12 +664,13 @@
   resolved "https://registry.yarnpkg.com/@gearbox-protocol/prettier-config/-/prettier-config-1.5.0.tgz#4df8e9fd2305fee6ab8c1417a02e31343836932a"
   integrity sha512-FUoprSsBdZyBjgxXCKL6mTkbeUJytaLzPJqIOoQpDmBRTX0seCc2o5I9PI9tySoRIlNnd/XXnKCXq1xHDEGbxw==
 
-"@gearbox-protocol/sdk@^1.20.6":
-  version "1.20.6"
-  resolved "https://registry.yarnpkg.com/@gearbox-protocol/sdk/-/sdk-1.20.6.tgz#d5a656f4a148492dacd8f6a19dd30be5e779c265"
-  integrity sha512-8idtRgDWna53T+RrVqrFy++X4SLDGt7dvQLztOAHRdbqyH8v7XSIqmjDZmbcXHEFd5u6jaB9nUMv3KeRux7qnw==
+"@gearbox-protocol/sdk@^1.23.0":
+  version "1.23.0"
+  resolved "https://registry.yarnpkg.com/@gearbox-protocol/sdk/-/sdk-1.23.0.tgz#4cda95468376b427a969d925deca51cddf549053"
+  integrity sha512-bMZ9lTKa8L0a898mfC4jQbxyCPAnqaYh26XhPra8SCw3kzQnhB7ow8yXPUBZ4EwiNomHKo1DQ4PAhWAMSPRj0A==
   dependencies:
     "@types/deep-eql" "^4.0.0"
+    axios "^1.2.0"
     decimal.js-light "^2.5.1"
     deep-eql "^4.1.0"
     moment "^2.29.4"
@@ -1968,6 +1969,15 @@ axios@^0.27.2:
   dependencies:
     follow-redirects "^1.14.9"
     form-data "^4.0.0"
+
+axios@^1.2.0:
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/axios/-/axios-1.4.0.tgz#38a7bf1224cd308de271146038b551d725f0be1f"
+  integrity sha512-S4XCWMEmzvo64T9GfvQDOXgYRDJ/wsSZc7Jvdgx5u1sd0JwsuPLqb3SYmusag+edF6ziyMensPVqLTSc1PiSEA==
+  dependencies:
+    follow-redirects "^1.15.0"
+    form-data "^4.0.0"
+    proxy-from-env "^1.1.0"
 
 babel-code-frame@^6.26.0:
   version "6.26.0"
