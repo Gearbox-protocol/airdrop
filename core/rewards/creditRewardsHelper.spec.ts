@@ -1,4 +1,5 @@
 import {
+  BigIntMath,
   CREDIT_MANAGER_DAI_V2_MAINNET,
   DUMB_ADDRESS,
   DUMB_ADDRESS2,
@@ -13,12 +14,11 @@ import {
   TransferAccountEvent,
 } from "@gearbox-protocol/sdk/lib/types/@gearbox-protocol/core-v2/contracts/interfaces/ICreditFacade.sol/ICreditFacade";
 import { expect } from "chai";
-import { BigNumber } from "ethers";
 
 const cfi = ICreditFacade__factory.createInterface();
 
-const bnToU256 = (bn: BigNumber) => {
-  const hexValue = bn.toHexString().replace("0x", "");
+const bnToU256 = (bn: bigint) => {
+  const hexValue = BigIntMath.toHexString(bn).replace("0x", "");
   return `${"0".repeat(64 - hexValue.length)}${hexValue}`;
 };
 
@@ -39,9 +39,9 @@ export const openCreditAccountEvent = (
   address: string,
   blockNumber: number,
   onBehalf: string,
-  borrowAmount: BigNumber,
+  borrowAmount: bigint,
 ) => {
-  const data = `0x${bnToU256(borrowAmount)}${bnToU256(BigNumber.from(0))}`;
+  const data = `0x${bnToU256(borrowAmount)}${bnToU256(0n)}`;
 
   return {
     blockNumber,
@@ -83,7 +83,7 @@ export const liquidateCreditAccountEvent = (
   return {
     blockNumber,
     address,
-    data: `0x${bnToU256(BigNumber.from(1))}`,
+    data: `0x${bnToU256(1n)}`,
     topics: [
       expired
         ? cfi.getEventTopic("LiquidateExpiredCreditAccount")
@@ -100,7 +100,7 @@ export const increaseBorrowedAmountEvent = (
   address: string,
   blockNumber: number,
   borrower: string,
-  amount: BigNumber,
+  amount: bigint,
 ) => {
   return {
     blockNumber,
@@ -115,7 +115,7 @@ export const decreaseBorrowedAmountEvent = (
   address: string,
   blockNumber: number,
   borrower: string,
-  amount: BigNumber,
+  amount: bigint,
 ) => {
   return {
     blockNumber,
@@ -151,7 +151,7 @@ describe("CreditRewards helper test", () => {
       CREDIT_MANAGER_DAI_V2_MAINNET,
       15902535,
       DUMB_ADDRESS,
-      BigNumber.from(1500),
+      1500n,
     );
     let openEvent = cfi.parseLog(e) as unknown as OpenCreditAccountEvent;
 
@@ -184,7 +184,7 @@ describe("CreditRewards helper test", () => {
       CREDIT_MANAGER_DAI_V2_MAINNET,
       15902535,
       DUMB_ADDRESS,
-      BigNumber.from(1898),
+      1898n,
     );
     const increaseEvent = cfi.parseLog(
       e,
@@ -196,7 +196,7 @@ describe("CreditRewards helper test", () => {
       CREDIT_MANAGER_DAI_V2_MAINNET,
       15902535,
       DUMB_ADDRESS,
-      BigNumber.from(1898),
+      1898n,
     );
     const decreaseEvent = cfi.parseLog(
       e,
