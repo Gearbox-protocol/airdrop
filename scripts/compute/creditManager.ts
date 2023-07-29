@@ -1,42 +1,29 @@
 import {
-  CREDIT_MANAGER_DAI_V2_GOERLI,
-  CREDIT_MANAGER_DAI_V2_MAINNET,
-  CREDIT_MANAGER_FRAX_V2_MAINNET,
-  CREDIT_MANAGER_USDC_V2_GOERLI,
-  CREDIT_MANAGER_USDC_V2_MAINNET,
-  CREDIT_MANAGER_WBTC_V2_GOERLI,
-  CREDIT_MANAGER_WBTC_V2_MAINNET,
-  CREDIT_MANAGER_WETH_V2_GOERLI,
-  CREDIT_MANAGER_WETH_V2_MAINNET,
-  CREDIT_MANAGER_WSTETH_V2_GOERLI,
-  CREDIT_MANAGER_WSTETH_V2_MAINNET,
-  deployedContracts,
   NetworkType,
   WAD,
+  creditManagerByNetwork,
+  getContractName,
 } from "@gearbox-protocol/sdk";
 import { Signer } from "ethers";
 
 import { CSVExport } from "../../core/csv/csvExport";
 import { CreditRewards } from "../../core/rewards/creditRewards";
 import { formatGear } from "../../core/utils/formatter";
+import { CMS_WITH_REWARDS } from "../../core";
 
 function getRewardCMs(network: NetworkType) {
-  return network === "Mainnet"
-    ? [
-        CREDIT_MANAGER_DAI_V2_MAINNET,
-        CREDIT_MANAGER_USDC_V2_MAINNET,
-        CREDIT_MANAGER_WETH_V2_MAINNET,
-        CREDIT_MANAGER_WSTETH_V2_MAINNET,
-        CREDIT_MANAGER_WBTC_V2_MAINNET,
-        CREDIT_MANAGER_FRAX_V2_MAINNET,
-      ]
-    : [
-        CREDIT_MANAGER_DAI_V2_GOERLI,
-        CREDIT_MANAGER_USDC_V2_GOERLI,
-        CREDIT_MANAGER_WETH_V2_GOERLI,
-        CREDIT_MANAGER_WSTETH_V2_GOERLI,
-        CREDIT_MANAGER_WBTC_V2_GOERLI,
-      ];
+  switch (network) {
+    case "Mainnet":
+      return CMS_WITH_REWARDS[network].map(
+        cm => creditManagerByNetwork[network][cm],
+      );
+    case "Arbitrum":
+      return CMS_WITH_REWARDS[network].map(
+        cm => creditManagerByNetwork[network][cm],
+      );
+    default:
+      return [];
+  }
 }
 
 export async function computeCreditManagers(
@@ -71,7 +58,7 @@ export async function computeCreditManagers(
 
       exportCsv.additem(
         reward.address,
-        `CM ${deployedContracts[cm]}`,
+        `CM ${getContractName(cm)}`,
         Number(reward.amount / WAD),
       );
     });
@@ -82,7 +69,7 @@ export async function computeCreditManagers(
     );
 
     console.log(
-      `Credit manager rewards for ${deployedContracts[cm]}: ${formatGear(
+      `Credit manager rewards for ${getContractName(cm)}: ${formatGear(
         total,
       )}, diff ${formatGear(total - prevTotalRewards)}`,
     );
