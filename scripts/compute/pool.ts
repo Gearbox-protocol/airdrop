@@ -1,10 +1,10 @@
 import { NetworkType, tokenDataByNetwork, WAD } from "@gearbox-protocol/sdk";
 import { Signer } from "ethers";
 
+import { POOLS_WITH_REWARDS } from "../../core";
 import { CSVExport } from "../../core/csv/csvExport";
 import { PoolRewards } from "../../core/rewards/poolRewards";
 import { formatGear } from "../../core/utils/formatter";
-import { POOLS_WITH_REWARDS } from "../../core";
 
 export async function computePools(
   exportCsv: CSVExport,

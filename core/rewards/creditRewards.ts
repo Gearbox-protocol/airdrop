@@ -1,7 +1,10 @@
 import {
+  creditManagerByAddress,
+  creditManagerByNetwork,
   ICreditConfigurator__factory,
   ICreditFacade__factory,
   ICreditManagerV2__factory,
+  NetworkType,
   toBigInt,
 } from "@gearbox-protocol/sdk";
 import {
@@ -23,11 +26,13 @@ export class CreditRewards {
     creditManager: string,
     address: string,
     provider: providers.Provider,
+    networkType: NetworkType,
     toBlock?: number,
   ): Promise<bigint> {
     const rewards = await CreditRewards.computeAllRewards(
       creditManager,
       provider,
+      networkType,
       toBlock,
     );
 
@@ -41,6 +46,7 @@ export class CreditRewards {
   static async computeAllRewards(
     creditManager: string,
     provider: providers.Provider,
+    networkType: NetworkType,
     toBlock?: number,
   ): Promise<Array<Reward>> {
     const toBlockQuery = toBlock || (await provider.getBlockNumber());
@@ -51,7 +57,7 @@ export class CreditRewards {
       toBlockQuery,
     );
 
-    const rewardPerBlock = this.getRewardsRange(creditManager);
+    const rewardPerBlock = this.getRewardsRange(creditManager, networkType);
     const parsed = this.parseCMEvents(events);
 
     return this.formatEvents(parsed, rewardPerBlock, toBlockQuery);
@@ -302,12 +308,15 @@ export class CreditRewards {
     return events;
   }
 
-  protected static getRewardsRange(creditManager: string): RangedValue {
-    const cmLC = creditManager.toLowerCase();
-    const rewardPerBlock = creditRewardsPerBlock[cmLC];
+  protected static getRewardsRange(
+    creditManager: string,
+    networkType: NetworkType,
+  ): RangedValue {
+    const symbol = creditManagerByAddress[creditManager.toLowerCase()];
+    const rewardPerBlock = creditRewardsPerBlock[networkType][symbol];
 
     if (!rewardPerBlock)
-      throw new Error(`Unknown credit manager token ${cmLC}`);
+      throw new Error(`Unknown credit manager token ${creditManager}`);
     return rewardPerBlock;
   }
 }

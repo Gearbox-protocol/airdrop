@@ -1,8 +1,8 @@
 import {
   ArbitrumCreditManagers,
-  MainnetCreditManagers,
   creditManagerByNetwork,
   DieselTokenTypes,
+  MainnetCreditManagers,
   NetworkType,
   TypedObjectUtils,
 } from "@gearbox-protocol/sdk";

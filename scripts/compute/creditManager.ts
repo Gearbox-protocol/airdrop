@@ -1,17 +1,17 @@
 import {
   ArbitrumCreditManagers,
+  creditManagerByNetwork,
+  getContractName,
   MainnetCreditManagers,
   NetworkType,
   WAD,
-  creditManagerByNetwork,
-  getContractName,
 } from "@gearbox-protocol/sdk";
 import { Signer } from "ethers";
 
+import { CMS_WITH_REWARDS } from "../../core";
 import { CSVExport } from "../../core/csv/csvExport";
 import { CreditRewards } from "../../core/rewards/creditRewards";
 import { formatGear } from "../../core/utils/formatter";
-import { CMS_WITH_REWARDS } from "../../core";
 
 function getCmAddress(network: NetworkType, cmSymbol: any) {
   const address = (creditManagerByNetwork[network] as any)[cmSymbol];
@@ -37,12 +37,14 @@ export async function computeCreditManagers(
     const creditRewards = await CreditRewards.computeAllRewards(
       cmAddress,
       deployer.provider!,
+      network,
       toBlock,
     );
 
     const prevCreditRewards = await CreditRewards.computeAllRewards(
       cmAddress,
       deployer.provider!,
+      network,
       prevBlock,
     );
 

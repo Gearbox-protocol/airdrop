@@ -2,8 +2,8 @@ import {
   ADDRESS_0X0,
   DieselTokenTypes,
   IERC20__factory,
-  NetworkType,
   isDieselToken,
+  NetworkType,
   toBigInt,
   tokenSymbolByAddress,
 } from "@gearbox-protocol/sdk";
