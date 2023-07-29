@@ -4,7 +4,7 @@ import {
   TypedObjectUtils,
 } from "@gearbox-protocol/sdk";
 
-import { addRewards,RangedValue } from "./range";
+import { addRewards, RangedValue } from "./range";
 
 export const POOLS_WITH_REWARDS: Record<
   NetworkType,

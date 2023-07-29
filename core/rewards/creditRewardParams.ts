@@ -6,13 +6,21 @@ import {
   TypedObjectUtils,
 } from "@gearbox-protocol/sdk";
 
-import { addRewards,RangedValue } from "./range";
+import { addRewards, RangedValue } from "./range";
 
 export const CMS_WITH_REWARDS: Record<
   NetworkType,
   Array<MainnetCreditManagers | ArbitrumCreditManagers>
 > = {
-  Mainnet: ["DAI_V2", "USDC_V2", "WETH_V2", "WBTC_V2", "WSTETH_V2", "FRAX_V2"],
+  Mainnet: [
+    "DAI_V2",
+    "USDC_V2",
+    "WETH_V2",
+    "WBTC_V2",
+    "WSTETH_V2",
+    "FRAX_V2",
+    "WETH_V2_1",
+  ],
   Arbitrum: [],
 };
 
@@ -39,6 +47,7 @@ const GEAR_PER_BLOCK: PartialRecord<MainnetCreditManagers, bigint> = {
   WBTC_V2: 0n,
   WSTETH_V2: 0n,
   FRAX_V2: 0n,
+  WETH_V2_1: 0n,
 };
 
 const MAINNET_BLOCK = 16033000;
@@ -55,6 +64,14 @@ addRewards({
   perBlock: GEAR_PER_BLOCK,
   rangedValues: creditRewardsPerBlock.Mainnet,
   list: ["FRAX_V2"],
+});
+
+const WETH_ALPHA_MAINNET_BLOCK = 99999000;
+addRewards({
+  fromBlock: WETH_ALPHA_MAINNET_BLOCK,
+  perBlock: GEAR_PER_BLOCK,
+  rangedValues: creditRewardsPerBlock.Mainnet,
+  list: ["WETH_V2_1"],
 });
 
 // const ARBITRUM_BLOCK = 7694030;
