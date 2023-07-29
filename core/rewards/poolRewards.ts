@@ -54,7 +54,6 @@ export class PoolRewards {
 
     events.forEach(e => {
       const from = e.args.from.toLowerCase();
-      const eventValue = toBigInt(e.args.value);
       if (from === ADDRESS_0X0) {
         totalSupply = totalSupply + toBigInt(e.args.value);
         totalSupplyRange.addValue(e.blockNumber, totalSupply);
@@ -163,7 +162,6 @@ export class PoolRewards {
       .filter(e => !e.args.value.isZero())
       .forEach(e => {
         const from = e.args.from.toLowerCase();
-        const eventValue = toBigInt(e.args.value);
         if (from === ADDRESS_0X0) {
           totalSupply = totalSupply + toBigInt(e.args.value);
           totalSupplyRange.addValue(e.blockNumber, totalSupply);
