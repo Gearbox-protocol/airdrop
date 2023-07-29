@@ -1,8 +1,8 @@
 import {
-  ArbitrumCreditManagers,
   MainnetCreditManagers,
   NetworkType,
   PartialRecord,
+  SupportedCreditManagers,
   TypedObjectUtils,
 } from "@gearbox-protocol/sdk";
 
@@ -10,7 +10,7 @@ import { addRewards, RangedValue } from "./range";
 
 export const CMS_WITH_REWARDS: Record<
   NetworkType,
-  Array<MainnetCreditManagers | ArbitrumCreditManagers>
+  Array<SupportedCreditManagers>
 > = {
   Mainnet: [
     "DAI_V2",
@@ -26,7 +26,7 @@ export const CMS_WITH_REWARDS: Record<
 
 export const creditRewardsPerBlock: Record<
   NetworkType,
-  Record<MainnetCreditManagers | ArbitrumCreditManagers, RangedValue>
+  Record<SupportedCreditManagers, RangedValue>
 > = {
   Mainnet: TypedObjectUtils.fromEntries(
     CMS_WITH_REWARDS.Mainnet.map(cm => {
