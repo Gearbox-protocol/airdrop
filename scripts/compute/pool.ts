@@ -2,11 +2,9 @@ import { NetworkType, tokenDataByNetwork, WAD } from "@gearbox-protocol/sdk";
 import { Signer } from "ethers";
 
 import { CSVExport } from "../../core/csv/csvExport";
-import {
-  POOL_REWARDS_DIESEL_TOKENS,
-  PoolRewards,
-} from "../../core/rewards/poolRewards";
+import { PoolRewards } from "../../core/rewards/poolRewards";
 import { formatGear } from "../../core/utils/formatter";
+import { POOLS_WITH_REWARDS } from "../../core";
 
 export async function computePools(
   exportCsv: CSVExport,
@@ -16,7 +14,7 @@ export async function computePools(
   prevBlock: number,
   deployer: Signer,
 ) {
-  for (const dToken of POOL_REWARDS_DIESEL_TOKENS) {
+  for (const dToken of POOLS_WITH_REWARDS[network]) {
     try {
       let total = 0n;
       const poolRewards = await PoolRewards.computeAllRewards(

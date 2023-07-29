@@ -3,7 +3,7 @@ import {
   DieselTokenTypes,
   IERC20__factory,
   NetworkType,
-  SupportedToken,
+  isDieselToken,
   toBigInt,
   tokenSymbolByAddress,
 } from "@gearbox-protocol/sdk";
@@ -13,15 +13,6 @@ import { providers } from "ethers";
 import { poolRewardsPerBlock } from "./poolRewardParams";
 import { RangedValue } from "./range";
 import { UniversalQuery } from "./universalQuery";
-
-export const POOL_REWARDS_DIESEL_TOKENS: Array<SupportedToken> = [
-  "dDAI",
-  "dUSDC",
-  "dWETH",
-  "dWBTC",
-  "dwstETH",
-  "dFRAX",
-];
 
 export interface Reward {
   address: string;
@@ -215,12 +206,14 @@ export class PoolRewards {
     dieselToken: string,
     networkType: NetworkType,
   ): RangedValue {
-    const rewardPerBlock =
-      poolRewardsPerBlock[networkType][
-        tokenSymbolByAddress[dieselToken.toLowerCase()] as DieselTokenTypes
-      ];
+    const symbol = tokenSymbolByAddress[dieselToken.toLowerCase()];
+    if (!isDieselToken(symbol))
+      throw new Error(`Unknown diesel token ${dieselToken}`);
 
-    if (!rewardPerBlock) throw new Error(`Unknown diesel token ${dieselToken}`);
+    const rewardPerBlock = poolRewardsPerBlock[networkType][symbol];
+
+    if (!rewardPerBlock)
+      throw new Error(`Unknown diesel token: bo reward ${dieselToken}`);
     return rewardPerBlock;
   }
 }
