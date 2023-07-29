@@ -40,7 +40,7 @@ async function updateDistributor() {
     chainId === 1337 ? await detectNetwork() : getNetworkType(chainId);
 
   dotenv.config({
-    path: network === "Goerli" ? ".env.goerli" : ".env.mainnet",
+    path: network === "Arbitrum" ? ".env.arbitrum" : ".env.mainnet",
   });
 
   const AIRDROP_DISTRIBUTOR = process.env.REACT_APP_AIRDROP_DISTRIBUTOR || "";
