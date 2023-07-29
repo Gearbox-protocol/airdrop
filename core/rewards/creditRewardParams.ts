@@ -4,36 +4,32 @@ import {
   creditManagerByNetwork,
   DieselTokenTypes,
   NetworkType,
+  TypedObjectUtils,
 } from "@gearbox-protocol/sdk";
 
 import { RangedValue } from "./range";
 
-type CmListType = {
-  [key in NetworkType]: key extends "Mainnet"
-    ? Array<MainnetCreditManagers>
-    : key extends "Arbitrum"
-    ? Array<ArbitrumCreditManagers>
-    : never;
-};
-
-export const CMS_WITH_REWARDS: CmListType = {
+export const CMS_WITH_REWARDS: Record<
+  NetworkType,
+  Array<MainnetCreditManagers | ArbitrumCreditManagers>
+> = {
   Mainnet: ["DAI_V2", "USDC_V2", "WETH_V2", "WBTC_V2", "WSTETH_V2", "FRAX_V2"],
   Arbitrum: [],
 };
 
-export const creditRewardsPerBlock: Record<string, RangedValue> = {
-  ...Object.fromEntries(
-    CMS_WITH_REWARDS.Mainnet.map(cm => [
-      creditManagerByNetwork.Mainnet[cm],
-      new RangedValue(),
-    ]),
+export const creditRewardsPerBlock: Record<
+  NetworkType,
+  Record<MainnetCreditManagers | ArbitrumCreditManagers, RangedValue>
+> = {
+  Mainnet: TypedObjectUtils.fromEntries(
+    CMS_WITH_REWARDS.Mainnet.map(cm => {
+      return [cm, new RangedValue()];
+    }),
   ),
-
-  ...Object.fromEntries(
-    CMS_WITH_REWARDS.Arbitrum.map(cm => [
-      creditManagerByNetwork.Arbitrum[cm],
-      new RangedValue(),
-    ]),
+  Arbitrum: TypedObjectUtils.fromEntries(
+    CMS_WITH_REWARDS.Arbitrum.map(token => {
+      return [token, new RangedValue()];
+    }),
   ),
 };
 
@@ -55,29 +51,29 @@ const GEAR_PER_BLOCK: Record<DieselTokenTypes, bigint> = {
 
 const MAINNET_BLOCK = 16033000;
 
-creditRewardsPerBlock[creditManagerByNetwork.Mainnet.DAI_V2].addValue(
+creditRewardsPerBlock.Mainnet.DAI_V2.addValue(
   MAINNET_BLOCK,
   (10n ** 18n * GEAR_PER_BLOCK.dDAI) / 100n,
 );
-creditRewardsPerBlock[creditManagerByNetwork.Mainnet.USDC_V2].addValue(
+creditRewardsPerBlock.Mainnet.USDC_V2.addValue(
   MAINNET_BLOCK,
   (10n ** 18n * GEAR_PER_BLOCK.dUSDC) / 100n,
 );
-creditRewardsPerBlock[creditManagerByNetwork.Mainnet.WETH_V2].addValue(
+creditRewardsPerBlock.Mainnet.WETH_V2.addValue(
   MAINNET_BLOCK,
   (10n ** 18n * GEAR_PER_BLOCK.dWETH) / 100n,
 );
-creditRewardsPerBlock[creditManagerByNetwork.Mainnet.WSTETH_V2].addValue(
+creditRewardsPerBlock.Mainnet.WSTETH_V2.addValue(
   MAINNET_BLOCK,
   (10n ** 18n * GEAR_PER_BLOCK.dwstETH) / 100n,
 );
-creditRewardsPerBlock[creditManagerByNetwork.Mainnet.WBTC_V2].addValue(
+creditRewardsPerBlock.Mainnet.WBTC_V2.addValue(
   MAINNET_BLOCK,
   (10n ** 18n * GEAR_PER_BLOCK.dWBTC) / 100n,
 );
 
 const FRAX_MAINNET_BLOCK = 16033000;
-creditRewardsPerBlock[creditManagerByNetwork.Mainnet.FRAX_V2].addValue(
+creditRewardsPerBlock.Mainnet.FRAX_V2.addValue(
   FRAX_MAINNET_BLOCK,
   (10n ** 18n * GEAR_PER_BLOCK.dFRAX) / 100n,
 );

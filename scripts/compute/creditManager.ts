@@ -1,4 +1,6 @@
 import {
+  ArbitrumCreditManagers,
+  MainnetCreditManagers,
   NetworkType,
   WAD,
   creditManagerByNetwork,
@@ -11,19 +13,14 @@ import { CreditRewards } from "../../core/rewards/creditRewards";
 import { formatGear } from "../../core/utils/formatter";
 import { CMS_WITH_REWARDS } from "../../core";
 
-function getRewardCMs(network: NetworkType) {
-  switch (network) {
-    case "Mainnet":
-      return CMS_WITH_REWARDS[network].map(
-        cm => creditManagerByNetwork[network][cm],
-      );
-    case "Arbitrum":
-      return CMS_WITH_REWARDS[network].map(
-        cm => creditManagerByNetwork[network][cm],
-      );
-    default:
-      return [];
+function getCmAddress(network: NetworkType, cmSymbol: any) {
+  const address = (creditManagerByNetwork[network] as any)[cmSymbol];
+
+  if (!address) {
+    throw new Error(`Unknown network:cm combinations: ${network}:${cmSymbol}`);
   }
+
+  return address;
 }
 
 export async function computeCreditManagers(
@@ -34,18 +31,17 @@ export async function computeCreditManagers(
   prevBlock: number,
   deployer: Signer,
 ) {
-  const cms = getRewardCMs(network);
-
-  for (const cm of cms) {
+  for (const cmSymbol of CMS_WITH_REWARDS[network]) {
+    const cmAddress = getCmAddress(network, cmSymbol);
     let total = 0n;
     const creditRewards = await CreditRewards.computeAllRewards(
-      cm,
+      cmAddress,
       deployer.provider!,
       toBlock,
     );
 
     const prevCreditRewards = await CreditRewards.computeAllRewards(
-      cm,
+      cmAddress,
       deployer.provider!,
       prevBlock,
     );
@@ -58,7 +54,7 @@ export async function computeCreditManagers(
 
       exportCsv.additem(
         reward.address,
-        `CM ${getContractName(cm)}`,
+        `CM ${getContractName(cmAddress)}`,
         Number(reward.amount / WAD),
       );
     });
@@ -69,7 +65,7 @@ export async function computeCreditManagers(
     );
 
     console.log(
-      `Credit manager rewards for ${getContractName(cm)}: ${formatGear(
+      `Credit manager rewards for ${getContractName(cmAddress)}: ${formatGear(
         total,
       )}, diff ${formatGear(total - prevTotalRewards)}`,
     );

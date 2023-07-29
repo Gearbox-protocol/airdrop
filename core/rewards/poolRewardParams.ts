@@ -1,25 +1,23 @@
 import {
   DieselTokenTypes,
   NetworkType,
-  SupportedToken,
   TypedObjectUtils,
 } from "@gearbox-protocol/sdk";
 
 import { RangedValue } from "./range";
 
-type PoolsListType = Record<NetworkType, Array<DieselTokenTypes>>;
-
-export const POOLS_WITH_REWARDS: PoolsListType = {
+export const POOLS_WITH_REWARDS: Record<
+  NetworkType,
+  Array<DieselTokenTypes>
+> = {
   Mainnet: ["dDAI", "dUSDC", "dWETH", "dWBTC", "dwstETH", "dFRAX"],
   Arbitrum: [],
 };
 
-type PoolsRewardsType = Record<
+export const poolRewardsPerBlock: Record<
   NetworkType,
   Record<DieselTokenTypes, RangedValue>
->;
-
-export const poolRewardsPerBlock: PoolsRewardsType = {
+> = {
   Mainnet: TypedObjectUtils.fromEntries(
     POOLS_WITH_REWARDS.Mainnet.map(token => {
       return [token, new RangedValue()];
@@ -32,7 +30,7 @@ export const poolRewardsPerBlock: PoolsRewardsType = {
   ),
 };
 
-export const GEAR_PER_BLOCK: Record<DieselTokenTypes, bigint> = {
+const GEAR_PER_BLOCK: Record<DieselTokenTypes, bigint> = {
   dDAI: 2283n,
   dUSDC: 2283n,
   dWETH: 3196n,
@@ -41,7 +39,7 @@ export const GEAR_PER_BLOCK: Record<DieselTokenTypes, bigint> = {
   dFRAX: 0n,
 };
 
-export const GEAR_PER_BLOCK_GIP30: Record<DieselTokenTypes, bigint> = {
+const GEAR_PER_BLOCK_GIP30: Record<DieselTokenTypes, bigint> = {
   dDAI: 2283n,
   dUSDC: 3101n,
   dWETH: 4014n,
