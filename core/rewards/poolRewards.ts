@@ -2,8 +2,8 @@ import {
   ADDRESS_0X0,
   DieselTokenTypes,
   IERC20__factory,
+  isDieselToken,
   NetworkType,
-  SupportedToken,
   toBigInt,
   tokenSymbolByAddress,
 } from "@gearbox-protocol/sdk";
@@ -13,15 +13,6 @@ import { providers } from "ethers";
 import { poolRewardsPerBlock } from "./poolRewardParams";
 import { RangedValue } from "./range";
 import { UniversalQuery } from "./universalQuery";
-
-export const POOL_REWARDS_DIESEL_TOKENS: Array<SupportedToken> = [
-  "dDAI",
-  "dUSDC",
-  "dWETH",
-  "dWBTC",
-  "dwstETH",
-  "dFRAX",
-];
 
 export interface Reward {
   address: string;
@@ -54,7 +45,6 @@ export class PoolRewards {
 
     events.forEach(e => {
       const from = e.args.from.toLowerCase();
-      const eventValue = toBigInt(e.args.value);
       if (from === ADDRESS_0X0) {
         totalSupply = totalSupply + toBigInt(e.args.value);
         totalSupplyRange.addValue(e.blockNumber, totalSupply);
@@ -163,7 +153,6 @@ export class PoolRewards {
       .filter(e => !e.args.value.isZero())
       .forEach(e => {
         const from = e.args.from.toLowerCase();
-        const eventValue = toBigInt(e.args.value);
         if (from === ADDRESS_0X0) {
           totalSupply = totalSupply + toBigInt(e.args.value);
           totalSupplyRange.addValue(e.blockNumber, totalSupply);
@@ -217,12 +206,14 @@ export class PoolRewards {
     dieselToken: string,
     networkType: NetworkType,
   ): RangedValue {
-    const rewardPerBlock =
-      poolRewardsPerBlock[networkType][
-        tokenSymbolByAddress[dieselToken.toLowerCase()] as DieselTokenTypes
-      ];
+    const symbol = tokenSymbolByAddress[dieselToken.toLowerCase()];
+    if (!isDieselToken(symbol))
+      throw new Error(`Unknown diesel token ${dieselToken}`);
 
-    if (!rewardPerBlock) throw new Error(`Unknown diesel token ${dieselToken}`);
+    const rewardPerBlock = poolRewardsPerBlock[networkType][symbol];
+
+    if (!rewardPerBlock)
+      throw new Error(`Unknown diesel token: bo reward ${dieselToken}`);
     return rewardPerBlock;
   }
 }

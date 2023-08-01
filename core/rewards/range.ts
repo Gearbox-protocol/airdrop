@@ -1,3 +1,5 @@
+import { PartialRecord } from "@gearbox-protocol/sdk";
+
 interface RangedValuesProps {
   keys: Array<number>;
   data: Array<[number, bigint]>;
@@ -98,4 +100,29 @@ export class RangedValue {
     };
     return JSON.stringify(toStringify);
   }
+}
+
+interface AddRewardsProps<T extends string> {
+  list: Array<T>;
+  perBlock: PartialRecord<T, bigint>;
+  rangedValues: Record<T, RangedValue>;
+  fromBlock: number;
+}
+
+export function addRewards<T extends string>({
+  list,
+  perBlock,
+  rangedValues,
+  fromBlock,
+}: AddRewardsProps<T>) {
+  list.forEach(rewardKey => {
+    const rewardPerBlock = perBlock[rewardKey];
+    if (rewardPerBlock === undefined)
+      throw new Error(`No rewards for ${rewardKey} from block ${fromBlock}`);
+
+    rangedValues[rewardKey].addValue(
+      fromBlock,
+      (10n ** 18n * rewardPerBlock) / 100n,
+    );
+  });
 }

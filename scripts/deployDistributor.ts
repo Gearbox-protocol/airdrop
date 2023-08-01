@@ -83,7 +83,7 @@ async function deployDistributorLive() {
     chainId === 1337 ? await detectNetwork() : getNetworkType(chainId);
 
   dotenv.config({
-    path: network === "Goerli" ? ".env.goerli" : ".env.mainnet",
+    path: network === "Arbitrum" ? ".env.arbitrum" : ".env.mainnet",
   });
 
   const ADDRESS_PROVIDER = process.env.REACT_APP_ADDRESS_PROVIDER || "";

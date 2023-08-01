@@ -1,6 +1,6 @@
 import {
   BigIntMath,
-  CREDIT_MANAGER_DAI_V2_MAINNET,
+  creditManagerByNetwork,
   DUMB_ADDRESS,
   DUMB_ADDRESS2,
   ICreditFacade__factory,
@@ -148,7 +148,7 @@ export const transferAccountEvent = (
 describe("CreditRewards helper test", () => {
   it("test events generated correctly", () => {
     let e = openCreditAccountEvent(
-      CREDIT_MANAGER_DAI_V2_MAINNET,
+      creditManagerByNetwork.Mainnet.DAI_V2,
       15902535,
       DUMB_ADDRESS,
       1500n,
@@ -159,7 +159,7 @@ describe("CreditRewards helper test", () => {
     expect(openEvent.args.borrowAmount.toNumber()).to.be.eq(1500);
 
     e = closeCreditAccountEvent(
-      CREDIT_MANAGER_DAI_V2_MAINNET,
+      creditManagerByNetwork.Mainnet.DAI_V2,
       15902535,
       DUMB_ADDRESS,
     );
@@ -168,7 +168,7 @@ describe("CreditRewards helper test", () => {
 
     for (let expired of [false, true]) {
       e = liquidateCreditAccountEvent(
-        CREDIT_MANAGER_DAI_V2_MAINNET,
+        creditManagerByNetwork.Mainnet.DAI_V2,
         15902535,
         DUMB_ADDRESS,
         expired,
@@ -181,7 +181,7 @@ describe("CreditRewards helper test", () => {
     }
 
     e = increaseBorrowedAmountEvent(
-      CREDIT_MANAGER_DAI_V2_MAINNET,
+      creditManagerByNetwork.Mainnet.DAI_V2,
       15902535,
       DUMB_ADDRESS,
       1898n,
@@ -193,7 +193,7 @@ describe("CreditRewards helper test", () => {
     expect(increaseEvent.args.amount.toNumber()).to.be.eq(1898);
 
     e = decreaseBorrowedAmountEvent(
-      CREDIT_MANAGER_DAI_V2_MAINNET,
+      creditManagerByNetwork.Mainnet.DAI_V2,
       15902535,
       DUMB_ADDRESS,
       1898n,
@@ -205,7 +205,7 @@ describe("CreditRewards helper test", () => {
     expect(decreaseEvent.args.amount.toNumber()).to.be.eq(1898);
 
     e = transferAccountEvent(
-      CREDIT_MANAGER_DAI_V2_MAINNET,
+      creditManagerByNetwork.Mainnet.DAI_V2,
       15902535,
       DUMB_ADDRESS,
       DUMB_ADDRESS2,

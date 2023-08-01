@@ -1,94 +1,82 @@
 import {
-  CREDIT_MANAGER_DAI_V2_GOERLI,
-  CREDIT_MANAGER_DAI_V2_MAINNET,
-  CREDIT_MANAGER_FRAX_V2_MAINNET,
-  CREDIT_MANAGER_USDC_V2_GOERLI,
-  CREDIT_MANAGER_USDC_V2_MAINNET,
-  CREDIT_MANAGER_WBTC_V2_GOERLI,
-  CREDIT_MANAGER_WBTC_V2_MAINNET,
-  CREDIT_MANAGER_WETH_V2_GOERLI,
-  CREDIT_MANAGER_WETH_V2_MAINNET,
-  CREDIT_MANAGER_WSTETH_V2_GOERLI,
-  CREDIT_MANAGER_WSTETH_V2_MAINNET,
-  CreditManagersV2,
-  DieselTokenTypes,
+  MainnetCreditManagers,
+  NetworkType,
+  PartialRecord,
+  SupportedCreditManagers,
+  TypedObjectUtils,
 } from "@gearbox-protocol/sdk";
 
-import { RangedValue } from "./range";
+import { addRewards, RangedValue } from "./range";
 
-export const creditRewardsPerBlock: Record<CreditManagersV2, RangedValue> = {
-  [CREDIT_MANAGER_DAI_V2_MAINNET]: new RangedValue(),
-  [CREDIT_MANAGER_USDC_V2_MAINNET]: new RangedValue(),
-  [CREDIT_MANAGER_WETH_V2_MAINNET]: new RangedValue(),
-  [CREDIT_MANAGER_WSTETH_V2_MAINNET]: new RangedValue(),
-  [CREDIT_MANAGER_WBTC_V2_MAINNET]: new RangedValue(),
-  [CREDIT_MANAGER_FRAX_V2_MAINNET]: new RangedValue(),
-
-  // GOERLI CM
-  [CREDIT_MANAGER_DAI_V2_GOERLI]: new RangedValue(),
-  [CREDIT_MANAGER_USDC_V2_GOERLI]: new RangedValue(),
-  [CREDIT_MANAGER_WETH_V2_GOERLI]: new RangedValue(),
-  [CREDIT_MANAGER_WSTETH_V2_GOERLI]: new RangedValue(),
-  [CREDIT_MANAGER_WBTC_V2_GOERLI]: new RangedValue(),
+export const CMS_WITH_REWARDS: Record<
+  NetworkType,
+  Array<SupportedCreditManagers>
+> = {
+  Mainnet: [
+    "DAI_V2",
+    "USDC_V2",
+    "WETH_V2",
+    "WBTC_V2",
+    "WSTETH_V2",
+    "FRAX_V2",
+    "WETH_V2_1",
+  ],
+  Arbitrum: [],
 };
 
-const GEAR_PER_BLOCK: Record<DieselTokenTypes, bigint> = {
-  dDAI: 166n,
-  dUSDC: 166n,
-  dWETH: 230n,
-  dWBTC: 0n,
-  dwstETH: 0n,
-  dFRAX: 0n,
+export const creditRewardsPerBlock: Record<
+  NetworkType,
+  Record<SupportedCreditManagers, RangedValue>
+> = {
+  Mainnet: TypedObjectUtils.fromEntries(
+    CMS_WITH_REWARDS.Mainnet.map(cm => {
+      return [cm, new RangedValue()];
+    }),
+  ),
+  Arbitrum: TypedObjectUtils.fromEntries(
+    CMS_WITH_REWARDS.Arbitrum.map(token => {
+      return [token, new RangedValue()];
+    }),
+  ),
 };
 
-const GOERLI_BLOCK = 7694030;
-
-creditRewardsPerBlock[CREDIT_MANAGER_DAI_V2_GOERLI].addValue(
-  GOERLI_BLOCK,
-  (10n ** 18n * GEAR_PER_BLOCK.dDAI) / 100n,
-);
-creditRewardsPerBlock[CREDIT_MANAGER_USDC_V2_GOERLI].addValue(
-  GOERLI_BLOCK,
-  (10n ** 18n * GEAR_PER_BLOCK.dUSDC) / 100n,
-);
-creditRewardsPerBlock[CREDIT_MANAGER_WETH_V2_GOERLI].addValue(
-  GOERLI_BLOCK,
-  (10n ** 18n * GEAR_PER_BLOCK.dWETH) / 100n,
-);
-creditRewardsPerBlock[CREDIT_MANAGER_WSTETH_V2_GOERLI].addValue(
-  GOERLI_BLOCK,
-  (10n ** 18n * GEAR_PER_BLOCK.dwstETH) / 100n,
-);
-creditRewardsPerBlock[CREDIT_MANAGER_WBTC_V2_GOERLI].addValue(
-  GOERLI_BLOCK,
-  (10n ** 18n * GEAR_PER_BLOCK.dWBTC) / 100n,
-);
+const GEAR_PER_BLOCK: PartialRecord<MainnetCreditManagers, bigint> = {
+  DAI_V2: 166n,
+  USDC_V2: 166n,
+  WETH_V2: 230n,
+  WBTC_V2: 0n,
+  WSTETH_V2: 0n,
+  FRAX_V2: 0n,
+  WETH_V2_1: 0n,
+};
 
 const MAINNET_BLOCK = 16033000;
-
-creditRewardsPerBlock[CREDIT_MANAGER_DAI_V2_MAINNET].addValue(
-  MAINNET_BLOCK,
-  (10n ** 18n * GEAR_PER_BLOCK.dDAI) / 100n,
-);
-creditRewardsPerBlock[CREDIT_MANAGER_USDC_V2_MAINNET].addValue(
-  MAINNET_BLOCK,
-  (10n ** 18n * GEAR_PER_BLOCK.dUSDC) / 100n,
-);
-creditRewardsPerBlock[CREDIT_MANAGER_WETH_V2_MAINNET].addValue(
-  MAINNET_BLOCK,
-  (10n ** 18n * GEAR_PER_BLOCK.dWETH) / 100n,
-);
-creditRewardsPerBlock[CREDIT_MANAGER_WSTETH_V2_MAINNET].addValue(
-  MAINNET_BLOCK,
-  (10n ** 18n * GEAR_PER_BLOCK.dwstETH) / 100n,
-);
-creditRewardsPerBlock[CREDIT_MANAGER_WBTC_V2_MAINNET].addValue(
-  MAINNET_BLOCK,
-  (10n ** 18n * GEAR_PER_BLOCK.dWBTC) / 100n,
-);
+addRewards({
+  fromBlock: MAINNET_BLOCK,
+  perBlock: GEAR_PER_BLOCK,
+  rangedValues: creditRewardsPerBlock.Mainnet,
+  list: ["DAI_V2", "USDC_V2", "WETH_V2", "WSTETH_V2", "WBTC_V2"],
+});
 
 const FRAX_MAINNET_BLOCK = 16033000;
-creditRewardsPerBlock[CREDIT_MANAGER_FRAX_V2_MAINNET].addValue(
-  FRAX_MAINNET_BLOCK,
-  (10n ** 18n * GEAR_PER_BLOCK.dFRAX) / 100n,
-);
+addRewards({
+  fromBlock: FRAX_MAINNET_BLOCK,
+  perBlock: GEAR_PER_BLOCK,
+  rangedValues: creditRewardsPerBlock.Mainnet,
+  list: ["FRAX_V2"],
+});
+
+const WETH_ALPHA_MAINNET_BLOCK = 99999000;
+addRewards({
+  fromBlock: WETH_ALPHA_MAINNET_BLOCK,
+  perBlock: GEAR_PER_BLOCK,
+  rangedValues: creditRewardsPerBlock.Mainnet,
+  list: ["WETH_V2_1"],
+});
+
+// const ARBITRUM_BLOCK = 7694030;
+
+// creditRewardsPerBlock[creditManagerByNetwork.Mainnet.Arbitrum.].addValue(
+//   ARBITRUM_BLOCK,
+//   (10n ** 18n * GEAR_PER_BLOCK.dDAI) / 100n,
+// );
