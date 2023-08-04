@@ -1,30 +1,36 @@
-import { DieselTokenTypes, NetworkType } from "@gearbox-protocol/sdk";
+import {
+  DieselTokenTypes,
+  NetworkType,
+  TypedObjectUtils,
+} from "@gearbox-protocol/sdk";
 
-import { RangedValue } from "./range";
+import { addRewards, RangedValue } from "./range";
+
+export const POOLS_WITH_REWARDS: Record<
+  NetworkType,
+  Array<DieselTokenTypes>
+> = {
+  Mainnet: ["dDAI", "dUSDC", "dWETH", "dWBTC", "dwstETH", "dFRAX"],
+  Arbitrum: [],
+};
 
 export const poolRewardsPerBlock: Record<
   NetworkType,
   Record<DieselTokenTypes, RangedValue>
 > = {
-  Mainnet: {
-    dDAI: new RangedValue(),
-    dUSDC: new RangedValue(),
-    dWETH: new RangedValue(),
-    dWBTC: new RangedValue(),
-    dwstETH: new RangedValue(),
-    dFRAX: new RangedValue(),
-  },
-  Goerli: {
-    dDAI: new RangedValue(),
-    dUSDC: new RangedValue(),
-    dWETH: new RangedValue(),
-    dWBTC: new RangedValue(),
-    dwstETH: new RangedValue(),
-    dFRAX: new RangedValue(),
-  },
+  Mainnet: TypedObjectUtils.fromEntries(
+    POOLS_WITH_REWARDS.Mainnet.map(token => {
+      return [token, new RangedValue()];
+    }),
+  ),
+  Arbitrum: TypedObjectUtils.fromEntries(
+    POOLS_WITH_REWARDS.Arbitrum.map(token => {
+      return [token, new RangedValue()];
+    }),
+  ),
 };
 
-export const GEAR_PER_BLOCK: Record<DieselTokenTypes, bigint> = {
+const GEAR_PER_BLOCK: Record<DieselTokenTypes, bigint> = {
   dDAI: 2283n,
   dUSDC: 2283n,
   dWETH: 3196n,
@@ -33,7 +39,15 @@ export const GEAR_PER_BLOCK: Record<DieselTokenTypes, bigint> = {
   dFRAX: 0n,
 };
 
-export const GEAR_PER_BLOCK_GIP30: Record<DieselTokenTypes, bigint> = {
+const MAINNET_BLOCK = 15820000;
+addRewards({
+  fromBlock: MAINNET_BLOCK,
+  perBlock: GEAR_PER_BLOCK,
+  rangedValues: poolRewardsPerBlock.Mainnet,
+  list: ["dDAI", "dUSDC", "dWETH", "dWBTC", "dwstETH"],
+});
+
+const GEAR_PER_BLOCK_GIP30: Record<DieselTokenTypes, bigint> = {
   dDAI: 2283n,
   dUSDC: 3101n,
   dWETH: 4014n,
@@ -42,83 +56,31 @@ export const GEAR_PER_BLOCK_GIP30: Record<DieselTokenTypes, bigint> = {
   dFRAX: 641n,
 };
 
-const GOERLI_BLOCK = 7694030;
-
-poolRewardsPerBlock.Goerli.dDAI.addValue(
-  GOERLI_BLOCK,
-  (10n ** 18n * GEAR_PER_BLOCK.dDAI) / 100n,
-);
-poolRewardsPerBlock.Goerli.dUSDC.addValue(
-  GOERLI_BLOCK,
-  (10n ** 18n * GEAR_PER_BLOCK.dUSDC) / 100n,
-);
-poolRewardsPerBlock.Goerli.dWETH.addValue(
-  GOERLI_BLOCK,
-  (10n ** 18n * GEAR_PER_BLOCK.dWETH) / 100n,
-);
-poolRewardsPerBlock.Goerli.dWBTC.addValue(
-  GOERLI_BLOCK,
-  (10n ** 18n * GEAR_PER_BLOCK.dWBTC) / 100n,
-);
-poolRewardsPerBlock.Goerli.dwstETH.addValue(
-  GOERLI_BLOCK,
-  (10n ** 18n * GEAR_PER_BLOCK.dwstETH) / 100n,
-);
-
-const GOERLI_BLOCK_FRAX = 7694030;
-poolRewardsPerBlock.Goerli.dFRAX.addValue(
-  GOERLI_BLOCK_FRAX,
-  (10n ** 18n * GEAR_PER_BLOCK.dFRAX) / 100n,
-);
-
-const MAINNET_BLOCK = 15820000;
-
-poolRewardsPerBlock.Mainnet.dDAI.addValue(
-  MAINNET_BLOCK,
-  (10n ** 18n * GEAR_PER_BLOCK.dDAI) / 100n,
-);
-poolRewardsPerBlock.Mainnet.dUSDC.addValue(
-  MAINNET_BLOCK,
-  (10n ** 18n * GEAR_PER_BLOCK.dUSDC) / 100n,
-);
-poolRewardsPerBlock.Mainnet.dWETH.addValue(
-  MAINNET_BLOCK,
-  (10n ** 18n * GEAR_PER_BLOCK.dWETH) / 100n,
-);
-poolRewardsPerBlock.Mainnet.dWBTC.addValue(
-  MAINNET_BLOCK,
-  (10n ** 18n * GEAR_PER_BLOCK.dWBTC) / 100n,
-);
-poolRewardsPerBlock.Mainnet.dwstETH.addValue(
-  MAINNET_BLOCK,
-  (10n ** 18n * GEAR_PER_BLOCK.dwstETH) / 100n,
-);
-
 const MAINNET_BLOCK_GIP30 = 15977000;
-
-poolRewardsPerBlock.Mainnet.dDAI.addValue(
-  MAINNET_BLOCK_GIP30,
-  (10n ** 18n * GEAR_PER_BLOCK_GIP30.dDAI) / 100n,
-);
-poolRewardsPerBlock.Mainnet.dUSDC.addValue(
-  MAINNET_BLOCK_GIP30,
-  (10n ** 18n * GEAR_PER_BLOCK_GIP30.dUSDC) / 100n,
-);
-poolRewardsPerBlock.Mainnet.dWETH.addValue(
-  MAINNET_BLOCK_GIP30,
-  (10n ** 18n * GEAR_PER_BLOCK_GIP30.dWETH) / 100n,
-);
-poolRewardsPerBlock.Mainnet.dWBTC.addValue(
-  MAINNET_BLOCK_GIP30,
-  (10n ** 18n * GEAR_PER_BLOCK_GIP30.dWBTC) / 100n,
-);
-poolRewardsPerBlock.Mainnet.dwstETH.addValue(
-  MAINNET_BLOCK_GIP30,
-  (10n ** 18n * GEAR_PER_BLOCK_GIP30.dwstETH) / 100n,
-);
+addRewards({
+  fromBlock: MAINNET_BLOCK_GIP30,
+  perBlock: GEAR_PER_BLOCK_GIP30,
+  rangedValues: poolRewardsPerBlock.Mainnet,
+  list: ["dDAI", "dUSDC", "dWETH", "dWBTC", "dwstETH"],
+});
 
 const MAINNET_BLOCK_FRAX = 16720000;
-poolRewardsPerBlock.Mainnet.dFRAX.addValue(
-  MAINNET_BLOCK_FRAX,
-  (10n ** 18n * GEAR_PER_BLOCK_GIP30.dFRAX) / 100n,
-);
+addRewards({
+  fromBlock: MAINNET_BLOCK_FRAX,
+  perBlock: GEAR_PER_BLOCK_GIP30,
+  rangedValues: poolRewardsPerBlock.Mainnet,
+  list: ["dFRAX"],
+});
+
+// const ARBITRUM_BLOCK = 7694030;
+
+// poolRewardsPerBlock.Arbitrum.dDAI.addValue(
+//   ARBITRUM_BLOCK,
+//   (10n ** 18n * GEAR_PER_BLOCK.dDAI) / 100n,
+// );
+
+// const ARBITRUM_BLOCK_FRAX = 7694030;
+// poolRewardsPerBlock.Arbitrum.dFRAX.addValue(
+//   ARBITRUM_BLOCK_FRAX,
+//   (10n ** 18n * GEAR_PER_BLOCK.dFRAX) / 100n,
+// );
