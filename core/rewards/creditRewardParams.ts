@@ -66,12 +66,29 @@ addRewards({
   list: ["FRAX_V2"],
 });
 
-const WETH_ALPHA_MAINNET_BLOCK = 99999000;
+const GEAR_PER_BLOCK_GIP66: PartialRecord<MainnetCreditManagers, bigint> = {
+  DAI_V2: 0n,
+  USDC_V2: 0n,
+  WETH_V2: 0n,
+  WBTC_V2: 0n,
+  WSTETH_V2: 0n,
+  FRAX_V2: 0n,
+  WETH_V2_1: 0n,
+};
+const GIP66_MAINNET_BLOCK = 17828000;
 addRewards({
-  fromBlock: WETH_ALPHA_MAINNET_BLOCK,
-  perBlock: GEAR_PER_BLOCK,
+  fromBlock: GIP66_MAINNET_BLOCK,
+  perBlock: GEAR_PER_BLOCK_GIP66,
   rangedValues: creditRewardsPerBlock.Mainnet,
-  list: ["WETH_V2_1"],
+  list: [
+    "DAI_V2",
+    "USDC_V2",
+    "WETH_V2",
+    "WBTC_V2",
+    "WSTETH_V2",
+    "FRAX_V2",
+    "WETH_V2_1",
+  ],
 });
 
 // const ARBITRUM_BLOCK = 7694030;
