@@ -3,7 +3,7 @@ import {
   creditManagerByNetwork,
   DUMB_ADDRESS,
   DUMB_ADDRESS2,
-  ICreditFacade__factory,
+  ICreditFacadeV2__factory,
 } from "@gearbox-protocol/sdk";
 import {
   CloseCreditAccountEvent,
@@ -12,10 +12,10 @@ import {
   LiquidateCreditAccountEvent,
   OpenCreditAccountEvent,
   TransferAccountEvent,
-} from "@gearbox-protocol/sdk/lib/types/@gearbox-protocol/core-v2/contracts/interfaces/ICreditFacade.sol/ICreditFacade";
+} from "@gearbox-protocol/sdk/lib/types/ICreditFacadeV2.sol/ICreditFacadeV2";
 import { expect } from "chai";
 
-const cfi = ICreditFacade__factory.createInterface();
+const cfi = ICreditFacadeV2__factory.createInterface();
 
 const bnToU256 = (bn: bigint) => {
   const hexValue = BigIntMath.toHexString(bn).replace("0x", "");

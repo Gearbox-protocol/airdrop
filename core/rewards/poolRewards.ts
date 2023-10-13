@@ -1,13 +1,12 @@
 import {
   ADDRESS_0X0,
-  DieselTokenTypes,
   IERC20__factory,
   isDieselToken,
   NetworkType,
   toBigInt,
   tokenSymbolByAddress,
 } from "@gearbox-protocol/sdk";
-import { TransferEvent } from "@gearbox-protocol/sdk/lib/types/@openzeppelin/contracts/token/ERC20/IERC20";
+import { TransferEvent } from "@gearbox-protocol/sdk/lib/types/IERC20";
 import { providers } from "ethers";
 
 import { poolRewardsPerBlock } from "./poolRewardParams";

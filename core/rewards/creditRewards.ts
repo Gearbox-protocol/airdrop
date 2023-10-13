@@ -1,19 +1,18 @@
 import {
   creditManagerByAddress,
-  creditManagerByNetwork,
-  ICreditConfigurator__factory,
-  ICreditFacade__factory,
+  ICreditConfiguratorV2__factory,
+  ICreditFacadeV2__factory,
   ICreditManagerV2__factory,
   NetworkType,
   toBigInt,
 } from "@gearbox-protocol/sdk";
+import { TypedEvent } from "@gearbox-protocol/sdk/lib/types/common";
 import {
   CloseCreditAccountEvent,
   IncreaseBorrowedAmountEvent,
   OpenCreditAccountEvent,
   TransferAccountEvent,
-} from "@gearbox-protocol/sdk/lib/types/@gearbox-protocol/core-v2/contracts/interfaces/ICreditFacade.sol/ICreditFacade";
-import { TypedEvent } from "@gearbox-protocol/sdk/lib/types/common";
+} from "@gearbox-protocol/sdk/lib/types/ICreditFacadeV2.sol/ICreditFacadeV2";
 import { providers } from "ethers";
 
 import { creditRewardsPerBlock } from "./creditRewardParams";
@@ -93,7 +92,7 @@ export class CreditRewards {
     const borrowed: Record<string, bigint> = {};
     let totalBorrowed = 0n;
 
-    const cfi = ICreditFacade__factory.createInterface();
+    const cfi = ICreditFacadeV2__factory.createInterface();
 
     events.forEach(e => {
       const event = cfi.parseLog(e);
@@ -245,7 +244,7 @@ export class CreditRewards {
     const cfAddrs = (
       await Promise.all(
         ccAddrs.map(async (ccAddr): Promise<string[]> => {
-          const cc = ICreditConfigurator__factory.connect(ccAddr, provider);
+          const cc = ICreditConfiguratorV2__factory.connect(ccAddr, provider);
           const cfUpgradedEvents = await cc.queryFilter(
             cc.filters.CreditFacadeUpgraded(),
             undefined,
@@ -270,7 +269,7 @@ export class CreditRewards {
     provider: providers.Provider,
     toBlock: number,
   ): Promise<Array<TypedEvent>> {
-    const cf = ICreditFacade__factory.connect(creditFacade, provider);
+    const cf = ICreditFacadeV2__factory.connect(creditFacade, provider);
     const topics = {
       OpenCreditAccount: cf.interface.getEventTopic("OpenCreditAccount"),
       CloseCreditAccount: cf.interface.getEventTopic("CloseCreditAccount"),
