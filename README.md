@@ -7,7 +7,7 @@ GEAR tokens were awarded over multiple community distribution stages, each with 
 1. Clone the repository: `git clone git@github.com:Gearbox-protocol/rewards.git`
 2. `cd rewards`
 3. Build: `yarn && yarn build-contract`
-4. Rename `.env.example` and fill all settings:
+4. Rename `.env.example` and fill all settings: 
 
 | Setting              | Value                 |
 | -------------------- | --------------------- |

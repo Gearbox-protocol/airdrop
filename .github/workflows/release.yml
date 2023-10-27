@@ -44,3 +44,23 @@ jobs:
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
           # Replace master with main, because by default cloudflare uses 'main' as production branch
           branch: ${{ github.ref_name == 'master' && 'main' || github.ref_name }}
+
+      - name: Notify on failure
+        if: ${{ failure() }}
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ vars.TELEGRAM_MAINNET_ALERTS }}
+          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          message: |
+            Error while deploying rewards update to cloudflare  
+
+            See ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+      - name: Notify on success
+        if: ${{ success() }}
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ vars.TELEGRAM_MAINNET_NOTIFICATIONS }}
+          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          message: |
+            Deployed rewards update to cloudflare
