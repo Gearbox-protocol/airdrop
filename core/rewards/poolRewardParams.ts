@@ -88,6 +88,22 @@ addRewards({
   list: ["dFRAX"],
 });
 
+const GEAR_PER_BLOCK_GIP_NEXT: Record<DieselTokenTypes, bigint> = {
+  dDAI: 1142n,
+  dUSDC: 1551n,
+  dWETH: 2207n,
+  dWBTC: 229n,
+  dwstETH: 0n,
+  dFRAX: 0n,
+};
+const GIP_NEXT_MAINNET_BLOCK = 18815109;
+addRewards({
+  fromBlock: GIP_NEXT_MAINNET_BLOCK,
+  perBlock: GEAR_PER_BLOCK_GIP_NEXT,
+  rangedValues: poolRewardsPerBlock.Mainnet,
+  list: ["dDAI", "dUSDC", "dWETH", "dWBTC", "dwstETH", "dFRAX"],
+});
+
 // const ARBITRUM_BLOCK = 7694030;
 
 // poolRewardsPerBlock.Arbitrum.dDAI.addValue(
