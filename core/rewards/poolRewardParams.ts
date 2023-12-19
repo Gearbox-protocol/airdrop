@@ -91,7 +91,7 @@ addRewards({
 const GEAR_PER_BLOCK_GIP_NEXT: Record<DieselTokenTypes, bigint> = {
   dDAI: 1142n,
   dUSDC: 1551n,
-  dWETH: 2207n,
+  dWETH: 2007n,
   dWBTC: 229n,
   dwstETH: 0n,
   dFRAX: 0n,
