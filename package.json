@@ -34,7 +34,8 @@
     "update-goerli": "npx hardhat run scripts/updateRewards.ts --network goerli --no-compile"
   },
   "dependencies": {
-    "axios": "^1.2.6"
+    "axios": "^1.2.6",
+    "yarn": "^1.22.21"
   },
   "devDependencies": {
     "@commitlint/cli": "^17.2.0",
