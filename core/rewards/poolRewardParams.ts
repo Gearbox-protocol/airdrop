@@ -10,7 +10,17 @@ export const POOLS_WITH_REWARDS: Record<
   NetworkType,
   Array<DieselTokenTypes>
 > = {
-  Mainnet: ["dDAI", "dUSDC", "dWETH", "dWBTC", "dwstETH", "dFRAX"],
+  Mainnet: [
+    "dDAI",
+    "dUSDC",
+    "dWETH",
+    "dWBTC",
+    "dwstETH",
+    "dFRAX",
+    "dUSDCV3",
+    "dWBTCV3",
+    "dWETHV3",
+  ],
   Arbitrum: [],
 };
 
